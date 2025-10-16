@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer className="bg-gray-50 border-t border-gray-200 mt-auto py-8">
+        <footer className="bg-stone-300 border-t border-stone-400 mt-auto py-8">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                     {/* Logo */}
@@ -17,27 +17,27 @@ export default function Footer() {
                         <h5 className="text-xl font-bold text-gray-800 mb-2">
                             Sobre la Empresa
                         </h5>
-                        <p className="text-gray-600 mb-1">
+                        <p className="text-gray-700 mb-1">
                             Especialistas dedicados a la venta de periféricos para todo tipo de jugador.
                         </p>
-                        <p className="text-gray-500 italic text-sm">
+                        <p className="text-gray-600 italic text-sm">
                             Tu experiencia de juego es nuestra prioridad, incluso aunque juegues en teléfonos.
                         </p>
                     </div>
 
                     {/* Contacto */}
                     <div className="md:col-span-2 text-center md:text-right">
-                        <p className="text-gray-700 font-semibold">
+                        <p className="text-gray-800 font-semibold">
                             Contacto:
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-gray-700">
                             contacto@ExDigital.cl
                         </p>
                     </div>
                 </div>
 
                 {/* Copyright */}
-                <div className="mt-6 pt-6 border-t border-gray-200 text-center text-gray-500 text-sm">
+                <div className="mt-6 pt-6 border-t border-stone-400 text-center text-gray-600 text-sm">
                     © {new Date().getFullYear()} Ex-Digital. Todos los derechos reservados.
                 </div>
             </div>
