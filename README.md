@@ -172,39 +172,3 @@ npm run lint
 | `/login` | Inicio de sesión |
 | `/registro` | Registro de nuevos usuarios |
 
-## 🌐 Despliegue
-
-### Despliegue en Vercel (Recomendado)
-
-1. Sube tu repositorio a GitHub
-2. Importa tu proyecto en [Vercel](https://vercel.com/new)
-3. Vercel detectará automáticamente Next.js y configurará el build
-4. ¡Listo! Tu sitio estará en línea
-
-### Otras Opciones
-- **Netlify**: Soporte completo para Next.js
-- **Railway**: Despliegue sencillo con soporte SSR
-- **AWS Amplify**: Solución escalable de Amazon
-
-## 📚 Recursos de Aprendizaje
-
-- [Documentación de Next.js](https://nextjs.org/docs)
-- [Tutorial Interactivo de Next.js](https://nextjs.org/learn)
-- [Documentación de React](https://react.dev)
-- [Documentación de Tailwind CSS](https://tailwindcss.com/docs)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs)
-
-## 👨‍💻 Desarrollo
-
-Este proyecto utiliza:
-- **Turbopack**: Para builds más rápidos en desarrollo
-- **ESLint**: Para mantener código consistente
-- **TypeScript**: Para prevenir errores con tipado estático
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
----
-
-Desarrollado con ❤️ usando Next.js
