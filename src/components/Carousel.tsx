@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Slide {
     img: string;
@@ -83,12 +83,6 @@ export default function Carousel() {
                     {/* Contenido */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6 z-10">
                         <div className="max-w-5xl animate-fade-in">
-                            {/* Badge premium con glow */}
-                            <div className="inline-flex items-center space-x-2 bg-stone-900/60 backdrop-blur-md px-5 py-2.5 rounded-full text-sm font-bold mb-8 border border-orange-600/50 glow-orange">
-                                <Sparkles className="w-4 h-4 text-orange-400" />
-                                <span className="text-orange-400">Productos Premium</span>
-                            </div>
-
                             {/* Título con glow */}
                             <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight glow-warm">
                                 <span className="bg-gradient-to-r from-orange-400 via-orange-300 to-teal-400 bg-clip-text text-transparent">
@@ -97,14 +91,9 @@ export default function Carousel() {
                             </h2>
 
                             {/* Descripción */}
-                            <p className="text-xl md:text-3xl lg:text-4xl mb-10 text-stone-300 font-medium">
+                            <p className="text-xl md:text-3xl lg:text-4xl text-stone-300 font-medium">
                                 {slide.description}
                             </p>
-
-                            {/* Botón CTA */}
-                            <button className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-10 py-5 rounded-2xl font-bold text-xl transition-all shadow-2xl hover:shadow-orange-600/50 hover:scale-105 border border-orange-500/50">
-                                Ver Productos
-                            </button>
                         </div>
                     </div>
                 </div>
