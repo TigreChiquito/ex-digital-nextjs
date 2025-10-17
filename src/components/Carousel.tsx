@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 interface Slide {
     img: string;
@@ -53,7 +52,7 @@ export default function Carousel() {
     };
 
     return (
-        <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden shadow-2xl">
             {/* Slides */}
             {slides.map((slide, index) => (
                 <div
@@ -69,26 +68,44 @@ export default function Carousel() {
                             onError={() => handleImageError(index)}
                         />
                     ) : (
-                        // Fallback: Gradiente con ícono si la imagen falla
-                        <div className="w-full h-full bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center">
-                            <div className="text-white text-center">
-                                <div className="text-6xl mb-4">🎮</div>
-                                <p className="text-xl">Imagen no disponible</p>
+                        // Fallback con gradiente oscuro cálido
+                        <div className="w-full h-full bg-gradient-to-br from-stone-900 via-orange-900 to-teal-900 flex items-center justify-center">
+                            <div className="text-center animate-fade-in">
+                                <div className="text-8xl mb-8 animate-float glow-warm">🎮</div>
+                                <p className="text-3xl font-bold text-orange-400 glow-warm">Gaming Periféricos</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Overlay oscuro para mejor legibilidad del texto */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    {/* Overlay oscuro con gradiente cálido */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-900/60 to-transparent"></div>
 
-                    {/* Texto */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4 z-10">
-                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 drop-shadow-2xl animate-fade-in">
-                            {slide.title}
-                        </h2>
-                        <p className="text-lg md:text-xl lg:text-2xl max-w-3xl drop-shadow-xl animate-fade-in">
-                            {slide.description}
-                        </p>
+                    {/* Contenido */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6 z-10">
+                        <div className="max-w-5xl animate-fade-in">
+                            {/* Badge premium con glow */}
+                            <div className="inline-flex items-center space-x-2 bg-stone-900/60 backdrop-blur-md px-5 py-2.5 rounded-full text-sm font-bold mb-8 border border-orange-600/50 glow-orange">
+                                <Sparkles className="w-4 h-4 text-orange-400" />
+                                <span className="text-orange-400">Productos Premium</span>
+                            </div>
+
+                            {/* Título con glow */}
+                            <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight glow-warm">
+                                <span className="bg-gradient-to-r from-orange-400 via-orange-300 to-teal-400 bg-clip-text text-transparent">
+                                    {slide.title}
+                                </span>
+                            </h2>
+
+                            {/* Descripción */}
+                            <p className="text-xl md:text-3xl lg:text-4xl mb-10 text-stone-300 font-medium">
+                                {slide.description}
+                            </p>
+
+                            {/* Botón CTA */}
+                            <button className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-10 py-5 rounded-2xl font-bold text-xl transition-all shadow-2xl hover:shadow-orange-600/50 hover:scale-105 border border-orange-500/50">
+                                Ver Productos
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}
@@ -96,30 +113,30 @@ export default function Carousel() {
             {/* Botón Anterior */}
             <button
                 onClick={prevSlide}
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/40 text-white p-3 md:p-4 rounded-full transition-all duration-300 z-20 hover:scale-110"
+                className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 bg-stone-900/60 backdrop-blur-md hover:bg-stone-800/80 text-orange-400 p-4 rounded-2xl transition-all duration-300 z-20 hover:scale-110 border-2 border-stone-700 hover:border-orange-600 shadow-xl"
                 aria-label="Anterior"
             >
-                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+                <ChevronLeft className="w-7 h-7" />
             </button>
 
             {/* Botón Siguiente */}
             <button
                 onClick={nextSlide}
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/40 text-white p-3 md:p-4 rounded-full transition-all duration-300 z-20 hover:scale-110"
+                className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 bg-stone-900/60 backdrop-blur-md hover:bg-stone-800/80 text-orange-400 p-4 rounded-2xl transition-all duration-300 z-20 hover:scale-110 border-2 border-stone-700 hover:border-orange-600 shadow-xl"
                 aria-label="Siguiente"
             >
-                <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+                <ChevronRight className="w-7 h-7" />
             </button>
 
             {/* Indicadores */}
-            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
+            <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
                 {slides.map((_, index) => (
                     <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
                         className={`transition-all duration-300 rounded-full ${index === currentSlide
-                                ? 'w-8 h-3 bg-white'
-                                : 'w-3 h-3 bg-white/50 hover:bg-white/75'
+                                ? 'w-12 h-3 bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg glow-orange'
+                                : 'w-3 h-3 bg-stone-600 hover:bg-stone-500 border border-stone-500'
                             }`}
                         aria-label={`Ir a slide ${index + 1}`}
                     />
