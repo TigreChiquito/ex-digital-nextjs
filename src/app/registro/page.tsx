@@ -27,8 +27,12 @@ export default function RegistroPage() {
             return;
         }
 
-        if (!email.includes('@')) {
-            setError('Por favor, ingresa un email válido');
+        // Validar dominios permitidos
+        const dominiosValidos = ['@duoc.cl', '@profesor.duoc.cl', '@gmail.com'];
+        const emailValido = dominiosValidos.some(dominio => email.toLowerCase().endsWith(dominio));
+        
+        if (!emailValido) {
+            setError('Solo se permiten correos con dominios @duoc.cl, @profesor.duoc.cl o @gmail.com');
             return;
         }
 
@@ -137,6 +141,12 @@ export default function RegistroPage() {
                                         placeholder="tu@email.com"
                                     />
                                 </div>
+                                <p className="mt-2 text-xs text-teal-400 flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Dominios permitidos: @duoc.cl, @profesor.duoc.cl, @gmail.com
+                                </p>
                             </div>
 
                             {/* Password */}

@@ -41,6 +41,11 @@ export default function ContactoPage() {
             return;
         }
 
+        if (mensaje.length > 500) {
+            setError('El mensaje no puede superar los 500 caracteres');
+            return;
+        }
+
         // Simular envío (aquí irías a tu API)
         console.log('Mensaje enviado:', { nombre, email, asunto, mensaje });
 
@@ -161,7 +166,7 @@ export default function ContactoPage() {
 
                                 {/* Nombre */}
                                 <div>
-                                    <label htmlFor="nombre" className="block text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide flex items-center space-x-2">
+                                    <label htmlFor="nombre" className="text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide flex items-center space-x-2">
                                         <span>Nombre Completo</span>
                                         {estaLogueado() && usuario?.nombre && (
                                             <span className="text-xs bg-teal-900/50 text-teal-400 px-2 py-0.5 rounded-full">Auto-completado</span>
@@ -183,7 +188,7 @@ export default function ContactoPage() {
 
                                 {/* Email */}
                                 <div>
-                                    <label htmlFor="email" className="block text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide flex items-center space-x-2">
+                                    <label htmlFor="email" className="text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide flex items-center space-x-2">
                                         <span>Email</span>
                                         {estaLogueado() && usuario?.email && (
                                             <span className="text-xs bg-teal-900/50 text-teal-400 px-2 py-0.5 rounded-full">Auto-completado</span>
@@ -224,8 +229,11 @@ export default function ContactoPage() {
 
                                 {/* Mensaje */}
                                 <div>
-                                    <label htmlFor="mensaje" className="block text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide">
-                                        Mensaje
+                                    <label htmlFor="mensaje" className="text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide flex items-center justify-between">
+                                        <span>Mensaje</span>
+                                        <span className={`text-xs font-normal ${mensaje.length > 500 ? 'text-red-400' : mensaje.length > 450 ? 'text-orange-400' : 'text-stone-500'}`}>
+                                            {mensaje.length}/500
+                                        </span>
                                     </label>
                                     <textarea
                                         id="mensaje"
@@ -233,9 +241,13 @@ export default function ContactoPage() {
                                         onChange={(e) => setMensaje(e.target.value)}
                                         disabled={enviado}
                                         rows={6}
+                                        maxLength={500}
                                         className="w-full px-4 py-4 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-4 focus:ring-orange-900 focus:border-orange-600 transition-all resize-none disabled:opacity-50"
                                         placeholder="Escribe tu mensaje aquí..."
                                     />
+                                    <p className="mt-2 text-xs text-stone-500">
+                                        Mínimo 10 caracteres, máximo 500 caracteres
+                                    </p>
                                 </div>
 
                                 {/* Botón de enviar */}
