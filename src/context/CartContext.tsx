@@ -10,6 +10,7 @@ export interface Producto {
     img2?: string;
     img3?: string;
     descripcion: string;
+    categoria: string;
 }
 
 export interface ProductoCarrito extends Producto {
