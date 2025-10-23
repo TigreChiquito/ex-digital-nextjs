@@ -45,7 +45,7 @@ export default function Footer() {
                 {/* Copyright */}
                 <div className="mt-8 pt-8 border-t-2 border-stone-800 text-center">
                     <p className="text-stone-400">
-                        © {new Date().getFullYear()} <span className="font-bold text-orange-400">Ex-Digital</span>. Todos los derechos reservados.
+                        © {new Date().getFullYear()} <span className="font-bold text-orange-400">Ex-Digital</span>. Todos los derechos reservados. <span>Pagina de practica</span>
                     </p>
                 </div>
             </div>
