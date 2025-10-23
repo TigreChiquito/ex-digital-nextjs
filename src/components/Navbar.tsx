@@ -1,18 +1,52 @@
+// 📍 UBICACIÓN: src/components/Navbar.tsx (REEMPLAZAR TODO EL ARCHIVO)
+
+// CAMBIOS PRINCIPALES:
+// 1. Agregado menú "Categorías" con dropdown
+// 2. Dropdown aparece al hacer hover (desktop)
+// 3. En mobile, las categorías se muestran en el menú expandible
+
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ShoppingCart, Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig'; // 👈 NUEVO: Importar config
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
+    const [showCategoriasMenu, setShowCategoriasMenu] = useState<boolean>(false); // 👈 NUEVO
+    const categoriasTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const { obtenerCantidadTotal } = useCart();
     const { usuario, cerrarSesion, estaLogueado } = useAuth();
 
     const cantidadProductos = obtenerCantidadTotal();
+
+    // Función para mostrar menú de categorías
+    const handleShowCategorias = () => {
+        if (categoriasTimeoutRef.current) {
+            clearTimeout(categoriasTimeoutRef.current);
+        }
+        setShowCategoriasMenu(true);
+    };
+
+    // Función para ocultar menú de categorías con delay
+    const handleHideCategorias = () => {
+        categoriasTimeoutRef.current = setTimeout(() => {
+            setShowCategoriasMenu(false);
+        }, 300); // 300ms de delay antes de cerrar
+    };
+
+    // Limpiar timeout al desmontar
+    useEffect(() => {
+        return () => {
+            if (categoriasTimeoutRef.current) {
+                clearTimeout(categoriasTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleCerrarSesion = () => {
         cerrarSesion();
@@ -20,8 +54,8 @@ export default function Navbar() {
     };
 
     return (
-        <div className="w-full py-4 px-4">
-            <nav className="bg-stone-900/90 backdrop-blur-md shadow-2xl rounded-3xl max-w-7xl mx-auto border-2 border-stone-800 glow-orange">
+        <div className="w-full py-4 px-4 relative z-50">
+            <nav className="bg-stone-900/90 backdrop-blur-md shadow-2xl rounded-3xl max-w-7xl mx-auto border-2 border-stone-800 glow-orange relative">
                 <div className="px-6">
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
@@ -50,6 +84,50 @@ export default function Navbar() {
                             >
                                 Productos
                             </Link>
+
+                            {/* ========== NUEVO: MENÚ DE CATEGORÍAS ========== */}
+                            <div 
+                                className="relative"
+                                onMouseEnter={handleShowCategorias}
+                                onMouseLeave={handleHideCategorias}
+                            >
+                                {/* Botón principal */}
+                                <button className="text-stone-300 hover:text-orange-400 font-semibold transition-all px-4 py-2 rounded-xl hover:bg-stone-800 flex items-center space-x-1">
+                                    <span>Categorías</span>
+                                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCategoriasMenu ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {/* Dropdown (aparece al hacer hover) */}
+                                {showCategoriasMenu && (
+                                    <div 
+                                        className="absolute top-full left-0 mt-1 w-64 bg-stone-900 rounded-2xl shadow-2xl py-2 z-[100] border-2 border-stone-700 animate-scale-in"
+                                        onMouseEnter={handleShowCategorias}
+                                        onMouseLeave={handleHideCategorias}
+                                    >
+                                        {/* Mapear las 3 categorías desde categoriasConfig */}
+                                        {Object.values(categoriasConfig).map((cat: CategoriaConfig) => (
+                                            <Link
+                                                key={cat.slug}
+                                                href={`/categorias/${cat.slug}`}
+                                                className="px-4 py-3 text-stone-300 hover:bg-stone-800 transition-colors rounded-xl mx-2 group flex"
+                                            >
+                                                <div className="flex items-center space-x-3">
+                                                    {/* Ícono emoji */}
+                                                    <span className="text-2xl group-hover:scale-110 transition-transform">{cat.icon}</span>
+                                                    <div>
+                                                        {/* Nombre */}
+                                                        <p className="font-bold text-sm group-hover:text-orange-400">{cat.nombre}</p>
+                                                        {/* Descripción */}
+                                                        <p className="text-xs text-stone-500">{cat.descripcion}</p>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {/* ========== FIN MENÚ DE CATEGORÍAS ========== */}
+
                             <Link
                                 href="/nosotros"
                                 className="text-stone-300 hover:text-orange-400 font-semibold transition-all px-4 py-2 rounded-xl hover:bg-stone-800"
@@ -97,7 +175,7 @@ export default function Navbar() {
                                     </button>
 
                                     {showUserMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-stone-900 rounded-2xl shadow-2xl py-2 z-50 border-2 border-stone-700 animate-scale-in">
+                                        <div className="absolute right-0 mt-2 w-48 bg-stone-900 rounded-2xl shadow-2xl py-2 z-[100] border-2 border-stone-700 animate-scale-in">
                                             <button
                                                 onClick={handleCerrarSesion}
                                                 className="w-full px-4 py-2 text-left text-red-400 hover:bg-stone-800 flex items-center space-x-2 transition-colors rounded-xl mx-1"
@@ -152,6 +230,27 @@ export default function Navbar() {
                             >
                                 Productos
                             </Link>
+
+                            {/* ========== CATEGORÍAS EN MOBILE ========== */}
+                            <div className="py-2 px-4">
+                                <p className="text-xs text-stone-500 font-bold uppercase tracking-wide mb-2">Categorías</p>
+                                <div className="space-y-1">
+                                    {/* Mapear categorías */}
+                                    {Object.values(categoriasConfig).map((cat: CategoriaConfig) => (
+                                        <Link
+                                            key={cat.slug}
+                                            href={`/categorias/${cat.slug}`}
+                                            className="py-2 px-3 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-lg transition-colors flex items-center space-x-2"
+                                            onClick={() => setIsOpen(false)}
+                                        >
+                                            <span className="text-xl">{cat.icon}</span>
+                                            <span className="font-medium">{cat.nombre}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* ========== FIN CATEGORÍAS MOBILE ========== */}
+
                             <Link
                                 href="/nosotros"
                                 className="block py-3 px-4 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-xl transition-colors font-semibold"

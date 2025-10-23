@@ -52,7 +52,7 @@ export default function Carousel() {
     };
 
     return (
-        <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden shadow-2xl">
+        <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden shadow-2xl z-0">
             {/* Slides */}
             {slides.map((slide, index) => (
                 <div
