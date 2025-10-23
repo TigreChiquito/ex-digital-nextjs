@@ -33,7 +33,7 @@ export default function LoginPage() {
         // Por ahora, simulamos un login exitoso
         const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios') || '[]');
         const usuarioEncontrado = usuariosGuardados.find(
-            (u: any) => u.email === email && u.password === password
+            (u: { email: string; password: string; nombre: string }) => u.email === email && u.password === password
         );
 
         if (usuarioEncontrado) {

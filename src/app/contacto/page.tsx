@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
-import { Mail, Phone, MapPin, Send, User, MessageSquare, Clock, CheckCircle } from 'lucide-react';
+import { Mail, Phone, Send, User, MessageSquare, Clock, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ContactoPage() {

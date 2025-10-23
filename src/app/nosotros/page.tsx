@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Award, Truck, Shield, Target, Heart, Zap, CheckCircle } from 'lucide-react';
+import { Users, Truck, Shield, Target, Heart, Zap, CheckCircle } from 'lucide-react';
 
 export default function NosotrosPage() {
     return (

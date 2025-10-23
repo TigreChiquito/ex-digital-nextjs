@@ -48,7 +48,7 @@ export default function RegistroPage() {
 
         // Verificar si el usuario ya existe
         const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios') || '[]');
-        const usuarioExiste = usuariosGuardados.find((u: any) => u.email === email);
+        const usuarioExiste = usuariosGuardados.find((u: { email: string }) => u.email === email);
 
         if (usuarioExiste) {
             setError('Este email ya está registrado');

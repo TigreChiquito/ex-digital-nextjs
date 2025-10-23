@@ -220,7 +220,7 @@ export default function ProductosPage() {
                                     </label>
                                     <select
                                         value={ordenamiento}
-                                        onChange={(e) => setOrdenamiento(e.target.value as any)}
+                                        onChange={(e) => setOrdenamiento(e.target.value as '' | 'menor' | 'mayor' | 'nombre')}
                                         className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 focus:outline-none focus:ring-4 focus:ring-orange-900 focus:border-orange-600 transition-all"
                                     >
                                         <option value="">Sin ordenar</option>
