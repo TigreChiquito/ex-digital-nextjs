@@ -201,7 +201,7 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-bold text-stone-300 mb-2 flex items-center space-x-2">
+                                        <label className="text-sm font-bold text-stone-300 mb-2 flex items-center space-x-2">
                                             <Mail className="w-4 h-4" />
                                             <span>Correo *</span>
                                         </label>
@@ -216,7 +216,7 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-bold text-stone-300 mb-2 flex items-center space-x-2">
+                                        <label className="text-sm font-bold text-stone-300 mb-2 flex items-center space-x-2">
                                             <Phone className="w-4 h-4" />
                                             <span>Teléfono *</span>
                                         </label>
