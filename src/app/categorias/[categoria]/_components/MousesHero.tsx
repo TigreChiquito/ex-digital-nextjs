@@ -32,30 +32,6 @@ export default function MousesHero() {
                     <p className="text-xl md:text-2xl text-stone-300 mb-8 max-w-3xl mx-auto">
                         Control absoluto y precisión milimétrica con sensores de última generación
                     </p>
-
-                    {/* Features de mouses */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                        
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-teal-700 rounded-2xl p-4">
-                            <Target className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">30K DPI</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-cyan-700 rounded-2xl p-4">
-                            <Mouse className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Ergonómico</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-teal-700 rounded-2xl p-4">
-                            <Boxes className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Botones Macro</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-cyan-700 rounded-2xl p-4">
-                            <Settings className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Personalizable</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

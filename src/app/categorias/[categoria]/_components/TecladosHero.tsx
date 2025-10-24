@@ -32,30 +32,6 @@ export default function TecladosHero() {
                     <p className="text-xl md:text-2xl text-stone-300 mb-8 max-w-3xl mx-auto">
                         Precisión milimétrica con switches mecánicos premium y RGB personalizable
                     </p>
-
-                    {/* Features de teclados */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                        
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-orange-700 rounded-2xl p-4">
-                            <Keyboard className="w-8 h-8 text-orange-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Switches Premium</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-red-700 rounded-2xl p-4">
-                            <Sparkles className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">RGB Completo</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-orange-700 rounded-2xl p-4">
-                            <Zap className="w-8 h-8 text-orange-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Anti-Ghosting</p>
-                        </div>
-
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-red-700 rounded-2xl p-4">
-                            <Gauge className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Respuesta 1ms</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

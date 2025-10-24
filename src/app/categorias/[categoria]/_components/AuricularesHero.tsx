@@ -34,34 +34,6 @@ export default function AuricularesHero() {
                     <p className="text-xl md:text-2xl text-stone-300 mb-8 max-w-3xl mx-auto">
                         Sumérgete en audio de alta fidelidad con cancelación de ruido y comodidad excepcional
                     </p>
-
-                    {/* Grid de 4 features con íconos */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                        
-                        {/* Feature 1: Sonido 7.1 */}
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-purple-700 rounded-2xl p-4">
-                            <Volume2 className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Sonido 7.1</p>
-                        </div>
-
-                        {/* Feature 2: Cancelación de ruido */}
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-pink-700 rounded-2xl p-4">
-                            <Headphones className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Cancelación Ruido</p>
-                        </div>
-
-                        {/* Feature 3: Inalámbricos */}
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-purple-700 rounded-2xl p-4">
-                            <Radio className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Inalámbricos</p>
-                        </div>
-
-                        {/* Feature 4: Micrófono HD */}
-                        <div className="bg-stone-900/50 backdrop-blur-md border-2 border-pink-700 rounded-2xl p-4">
-                            <Mic className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                            <p className="text-sm font-bold text-stone-200">Mic HD</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
