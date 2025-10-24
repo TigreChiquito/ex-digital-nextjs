@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -8,11 +8,18 @@ import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { iniciarSesion } = useAuth();
+    const { iniciarSesion, estaLogueado } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+
+    // Redirigir si ya está logueado
+    useEffect(() => {
+        if (estaLogueado()) {
+            router.push('/');
+        }
+    }, [estaLogueado, router]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
