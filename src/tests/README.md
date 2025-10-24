@@ -1,57 +1,50 @@
 # 🧪 Tests de Autenticación - Selenium
 
-Suite de tests automatizados para validar las funcionalidades de Login y Registro de la aplicación.
+Suite de tests automatizados para validar las funcionalidades de Login y Registro de la aplicación Ex-Digital.
+
+**URL de prueba:** https://exdigital.vercel.app
 
 ---
 
 ## 📋 Requisitos Previos
 
-### 1. Python 3.8 o superior
+### Python 3.8 o superior
 ```bash
 python --version
 ```
 
-### 2. Instalar Selenium
-```bash
-pip install selenium
-```
-
-### 3. ChromeDriver
-El driver de Chrome debe estar instalado. Opciones:
-
-**Opción A: Instalación automática (Python 3.10+)**
-```bash
-pip install webdriver-manager
-```
-
-**Opción B: Descarga manual**
-- Descargar desde: https://chromedriver.chromium.org/
-- Colocar en PATH o en la carpeta del proyecto
-
 ---
 
-## 🚀 Cómo Ejecutar los Tests
+## 🚀 Instalación y Ejecución
 
-### Paso 1: Instalar dependencias
+### Opción 1: Ejecución Rápida (Recomendado)
+
+**Windows:**
+```bash
+cd src/tests
+run_tests.bat
+```
+
+**Linux/Mac:**
+```bash
+cd src/tests
+chmod +x run_tests.sh
+./run_tests.sh
+```
+
+El script instalará automáticamente las dependencias si no están presentes.
+
+### Opción 2: Ejecución Manual
+
+**Paso 1:** Instalar dependencias
 ```bash
 cd src/tests
 pip install -r requirements.txt
 ```
 
-### Paso 2: Ejecutar los tests
-Los tests están configurados para ejecutarse contra la aplicación en producción:
-**URL: https://exdigital.vercel.app**
-
+**Paso 2:** Ejecutar tests
 ```bash
-cd src/tests
 python test_auth.py
-```
-
-### Testear en Desarrollo Local (Opcional)
-Si quieres testear en `http://localhost:3000`, edita `test_auth.py`:
-```python
-# Línea 17
-test = TestAuth(base_url="http://localhost:3000")
 ```
 
 ---
@@ -60,44 +53,57 @@ test = TestAuth(base_url="http://localhost:3000")
 
 ```
 src/tests/
-├── test_auth.py           # Script principal de testing
-├── usuarios_test.csv      # Casos de prueba (26 tests)
-└── README.md             # Esta documentación
+├── test_auth.py           # Script principal con 26 tests
+├── config.py              # Configuración (URL, timeouts)
+├── usuarios_test.csv      # Datos de prueba
+├── requirements.txt       # Dependencias Python
+├── run_tests.bat          # Script ejecución Windows
+├── run_tests.sh           # Script ejecución Linux/Mac
+├── README.md              # Esta documentación
+└── CHANGELOG_TESTS.md     # Historial de cambios
 ```
 
 ---
 
-## 📝 Casos de Prueba Incluidos
+## 📝 Casos de Prueba (26 tests)
 
 ### ✅ Tests de Registro (15 casos)
 
-| Tipo | Descripción | Resultado Esperado |
-|------|-------------|-------------------|
-| ✅ Válido | Email @duoc.cl | Éxito |
-| ✅ Válido | Email @profesor.duoc.cl | Éxito |
-| ✅ Válido | Email @gmail.com | Éxito |
-| ❌ Inválido | Email con dominio no permitido | Error |
-| ❌ Inválido | Contraseña muy corta (< 6) | Error |
-| ❌ Inválido | Contraseñas no coinciden | Error |
-| ❌ Inválido | Email sin formato válido | Error |
-| ❌ Inválido | Campos vacíos | Error |
+| # | Caso | Email | Resultado |
+|---|------|-------|-----------|
+| 1 | Válido @duoc.cl | juan.perez@duoc.cl | ✅ Éxito |
+| 2 | Válido @profesor.duoc.cl | maria.gonzalez@profesor.duoc.cl | ✅ Éxito |
+| 3 | Válido @gmail.com | carlos.rojas@gmail.com | ✅ Éxito |
+| 4 | Inválido @hotmail.com | ana.lopez@hotmail.com | ❌ Error |
+| 5 | Inválido @yahoo.com | pedro.soto@yahoo.com | ❌ Error |
+| 6 | Contraseña corta (< 6) | luis.munoz@duoc.cl | ❌ Error |
+| 7 | Contraseñas no coinciden | carmen.silva@duoc.cl | ❌ Error |
+| 8 | Email formato simple | elena@duoc.cl | ✅ Éxito |
+| 9 | Email inválido | invalidemail | ❌ Error |
+| 10 | Contraseña vacía | sofia.herrera@duoc.cl | ❌ Error |
+| 11 | Nombre vacío | laura.castro@duoc.cl | ❌ Error |
+| 12 | Email mayúsculas | patricia.nunez@DUOC.CL | ✅ Éxito |
+| 13 | Usuario ya registrado | diego.morales@duoc.cl | ❌ Error |
+| 14-15 | Más casos de validación | - | - |
 
 ### ✅ Tests de Login (11 casos)
 
-| Tipo | Descripción | Resultado Esperado |
-|------|-------------|-------------------|
-| ✅ Válido | Credenciales correctas | Éxito |
-| ❌ Inválido | Usuario no registrado | Error |
-| ❌ Inválido | Contraseña incorrecta | Error |
-| ❌ Inválido | Email sin formato válido | Error |
-| ❌ Inválido | Campos vacíos | Error |
+| # | Caso | Email | Resultado |
+|---|------|-------|-----------|
+| 1-5 | Usuarios registrados | juan.perez@duoc.cl, etc. | ✅ Éxito |
+| 6 | Usuario no existente | noexiste@duoc.cl | ❌ Error |
+| 7 | Contraseña incorrecta | juan.perez@duoc.cl | ❌ Error |
+| 8 | Email inválido | invalidemail | ❌ Error |
+| 9 | Email vacío | - | ❌ Error |
+| 10 | Contraseña vacía | maria.gonzalez@profesor.duoc.cl | ❌ Error |
+| 11 | Case sensitive | JUAN.PEREZ@DUOC.CL | ❌ Error |
 
 ---
 
 ## 🎯 Validaciones Implementadas
 
 ### Registro
-- ✅ Dominios permitidos: `@duoc.cl`, `@profesor.duoc.cl`, `@gmail.com`
+✅ Dominios permitidos: `@duoc.cl`, `@profesor.duoc.cl`, `@gmail.com`
 - ✅ Contraseña mínima: 6 caracteres
 - ✅ Confirmación de contraseña debe coincidir
 - ✅ Formato de email válido

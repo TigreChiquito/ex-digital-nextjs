@@ -1,6 +1,5 @@
 @echo off
 REM Script para ejecutar tests de Selenium en Windows
-REM Asegurate de tener Python instalado y la app corriendo en localhost:3000
 
 echo ============================================================
 echo     TESTS DE AUTENTICACION - EX DIGITAL
@@ -28,16 +27,15 @@ if errorlevel 1 (
 )
 
 echo ============================================================
-echo  Selecciona el tipo de test a ejecutar:
+echo  Selecciona una opcion:
 echo ============================================================
-echo  1. Tests completos desde CSV (26 casos)
-echo  2. Tests individuales interactivos
-echo  3. Instalar/actualizar dependencias
-echo  4. Salir
+echo  1. Ejecutar tests (26 casos de prueba)
+echo  2. Instalar/actualizar dependencias
+echo  3. Salir
 echo ============================================================
 echo.
 
-set /p opcion="Ingresa tu opcion (1-4): "
+set /p opcion="Ingresa tu opcion (1-3): "
 
 if "%opcion%"=="1" (
     echo.
@@ -47,15 +45,11 @@ if "%opcion%"=="1" (
     python test_auth.py
 ) else if "%opcion%"=="2" (
     echo.
-    echo [*] Ejecutando tests individuales...
-    python test_individual.py
-) else if "%opcion%"=="3" (
-    echo.
     echo [*] Instalando/actualizando dependencias...
     pip install --upgrade -r requirements.txt
     echo.
     echo [OK] Dependencias actualizadas
-) else if "%opcion%"=="4" (
+) else if "%opcion%"=="3" (
     echo.
     echo [*] Saliendo...
     exit /b 0

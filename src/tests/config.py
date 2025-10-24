@@ -30,4 +30,4 @@ ACTION_DELAY = 2  # Pausa entre acciones de test (aumentado para producción)
 TEST_DELAY = 1  # Pausa entre tests completos
 CLEANUP_DELAY = 2  # Pausa antes de cerrar el navegador
 
-print(f"🌐 Configuración cargada: {BASE_URL}")
+print(f"Configuracion cargada: {BASE_URL}")

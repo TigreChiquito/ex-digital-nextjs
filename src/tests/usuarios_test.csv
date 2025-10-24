@@ -6,7 +6,7 @@ registro,Ana López,ana.lopez@hotmail.com,Pass123,Pass123,error,Email inválido 
 registro,Pedro Soto,pedro.soto@yahoo.com,Test456,Test456,error,Email inválido (dominio no permitido)
 registro,Luis Muñoz,luis.munoz@duoc.cl,123,123,error,Contraseña muy corta (menos de 6 caracteres)
 registro,Carmen Silva,carmen.silva@duoc.cl,Pass123,Pass456,error,Contraseñas no coinciden
-registro,Roberto Díaz,roberto.diaz@gmail.com,password,password,exito,Contraseña válida de 8 caracteres
+registro,Roberto Díaz,roberto.diaz@duoc.cl,password,password,exito,Contraseña válida de 8 caracteres
 registro,Elena Vargas,elena@duoc.cl,Test1234,Test1234,exito,Email válido formato simple
 registro,Jorge Ortiz,invalidemail,Pass123,Pass123,error,Email sin formato válido
 registro,Sofía Herrera,sofia.herrera@duoc.cl,,Pass123,error,Contraseña vacía
@@ -14,14 +14,14 @@ registro,,laura.castro@duoc.cl,Pass123,Pass123,error,Nombre vacío
 registro,Marcos Torres,marcos.torres@profesor.duoc.cl,Abc12345,Abc12345,exito,Registro válido con contraseña alfanumérica
 registro,Patricia Núñez,patricia.nunez@DUOC.CL,Test999,Test999,exito,Email con mayúsculas
 registro,Diego Morales,diego.morales@duoc.cl,12345,12345,error,Contraseña solo números muy corta
-login,juan.perez@duoc.cl,Password123,,exito,Login con usuario registrado previamente
-login,maria.gonzalez@profesor.duoc.cl,Secure456,,exito,Login profesor válido
-login,carlos.rojas@gmail.com,Test789,,exito,Login Gmail válido
-login,noexiste@duoc.cl,Password123,,error,Usuario no registrado
-login,juan.perez@duoc.cl,WrongPass,,error,Contraseña incorrecta
-login,invalidemail,Pass123,,error,Email sin formato válido
-login,,Password123,,error,Email vacío
-login,maria.gonzalez@profesor.duoc.cl,,,error,Contraseña vacía
-login,roberto.diaz@gmail.com,password,,exito,Login usuario Gmail registrado
-login,JUAN.PEREZ@DUOC.CL,Password123,,error,Email con mayúsculas (case sensitive)
-login,elena@duoc.cl,Test1234,,exito,Login con formato email simple
+login,,juan.perez@duoc.cl,Password123,,exito,Login con usuario registrado previamente
+login,,maria.gonzalez@profesor.duoc.cl,Secure456,,exito,Login profesor válido
+login,,roberto.diaz@duoc.cl,password,,exito,Login usuario registrado
+login,,elena@duoc.cl,Test1234,,exito,Login con formato email simple
+login,,marcos.torres@profesor.duoc.cl,Abc12345,,exito,Login profesor con alfanumérica
+login,,noexiste@duoc.cl,Password123,,error,Usuario no registrado
+login,,juan.perez@duoc.cl,WrongPass,,error,Contraseña incorrecta
+login,,invalidemail,Pass123,,error,Email sin formato válido
+login,,,Password123,,error,Email vacío
+login,,maria.gonzalez@profesor.duoc.cl,,,error,Contraseña vacía
+login,,JUAN.PEREZ@DUOC.CL,Password123,,error,Email con mayúsculas (case sensitive)
