@@ -225,3 +225,61 @@ npm run lint
 - ✅ Mensaje máximo 500 caracteres
 - ✅ Auto-completado para usuarios logueados
 
+## 🧪 Testing
+
+El proyecto incluye una suite completa de tests automatizados con Selenium.
+
+### Instalación de Dependencias de Testing
+```bash
+cd src/tests
+pip install -r requirements.txt
+```
+
+### Ejecutar Tests Completos
+```bash
+# Los tests se ejecutan contra producción: https://exdigital.vercel.app
+cd src/tests
+python test_auth.py
+```
+
+### Ejecutar Tests Individuales
+```bash
+cd src/tests
+python test_individual.py
+```
+
+### Testear en Desarrollo Local
+Para testear contra `http://localhost:3000`, edita `test_auth.py`:
+```python
+test = TestAuth(base_url="http://localhost:3000")
+```
+
+### Casos de Prueba Incluidos
+- **26 casos de prueba automatizados**
+  - 15 tests de registro (válidos e inválidos)
+  - 11 tests de login (válidos e inválidos)
+
+### Estructura de Tests
+```
+src/tests/
+├── test_auth.py           # Suite completa de tests
+├── test_individual.py     # Tests individuales interactivos
+├── usuarios_test.csv      # 26 casos de prueba
+├── requirements.txt       # Dependencias Python
+└── README.md             # Documentación detallada de testing
+```
+
+### Resultados Esperados
+```
+============================================================
+📊 RESUMEN DE TESTS
+============================================================
+Total de tests: 26
+✅ Exitosos: 24-26
+❌ Fallidos: 0-2
+📈 Porcentaje de éxito: 92-100%
+============================================================
+```
+
+Para más información sobre los tests, consulta [src/tests/README.md](src/tests/README.md)
+
