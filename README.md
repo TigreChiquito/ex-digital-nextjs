@@ -10,18 +10,26 @@ Tienda en línea de productos tecnológicos desarrollada con Next.js 15, React 1
 - [Instalación](#instalación)
 - [Uso](#uso)
 - [Rutas Disponibles](#rutas-disponibles)
-- [Despliegue](#despliegue)
+- [Validaciones del Sistema](#validaciones-del-sistema)
+- [Testing](#testing)
+- [Contribuir](#contribuir)
+- [Licencia](#licencia)
 
 ## ✨ Características
 
-- 🎨 Diseño moderno y responsivo con Tailwind CSS
-- 🛍️ Carrito de compras funcional con Context API
-- 🔐 Sistema de autenticación (login/registro)
-- 📱 Diseño mobile-first
-- ⚡ Optimización con Turbopack
-- 🖼️ Gestión optimizada de imágenes
-- 🎯 Tipado estático con TypeScript
-- 🔄 Enrutamiento basado en carpetas (App Router)
+- Diseño moderno y responsivo con Tailwind CSS v4
+- Carrito de compras funcional con Context API
+- Sistema completo de autenticación (login/registro)
+  - Validación de dominios de email permitidos
+  - Protección de rutas (redirección automática)
+  - Persistencia con localStorage
+- Diseño mobile-first totalmente responsivo
+- Optimización con Turbopack (Next.js 15)
+- Gestión optimizada de imágenes (formato AVIF)
+- Tipado estático con TypeScript
+- Enrutamiento basado en carpetas (App Router)
+- Suite completa de 26 tests E2E con Selenium (100% éxito)
+- Desplegado en producción: [exdigital.vercel.app](https://exdigital.vercel.app)
 
 ## 🚀 Tecnologías
 
@@ -115,10 +123,11 @@ Sistema de enrutamiento basado en carpetas de Next.js 15.
 - Cada carpeta representa una ruta
 - `page.tsx` define el contenido de cada ruta
 - `layout.tsx` envuelve todas las páginas con componentes comunes (Navbar, Footer)
+- **Protección de rutas:** `/login` y `/registro` redirigen automáticamente si hay sesión activa
 
 ### 3. **`src/components/`** - Componentes Reutilizables
 Componentes de React que se usan en múltiples páginas:
-- **Navbar**: Navegación principal con enlaces y carrito
+- **Navbar**: Navegación principal con enlaces, carrito y autenticación
 - **Footer**: Pie de página con información de contacto
 - **ProductCard**: Tarjeta individual de producto
 - **ProductModal**: Modal para ver detalles del producto
@@ -127,37 +136,19 @@ Componentes de React que se usan en múltiples páginas:
 ### 4. **`src/context/`** - Estado Global
 Manejo del estado global con Context API:
 - **CartContext**: Gestiona productos en el carrito, agregar/eliminar items
-- **AuthContext**: Maneja el estado de autenticación del usuario
+- **AuthContext**: Maneja el estado de autenticación del usuario (localStorage)
 
 ### 5. **`src/data/`** - Datos Estáticos
 - **productos.ts**: Array con información de todos los productos (nombre, precio, imagen, descripción)
 
 ### 6. **`src/tests/`** - Tests Automatizados
-Suite de pruebas para validar funcionalidad:
-- **testSelenium.py**: Tests end-to-end con Selenium WebDriver
-  - Test de registro de usuario
-  - Test de inicio de sesión
-- **run_tests.py**: Script para ejecutar todos los tests de forma secuencial
-- **usuarios_test.csv**: Conjunto de datos de prueba con casos de éxito y fallo
-
-## 🧪 Testing
-
-### Ejecutar Tests de Selenium
-
-**Requisitos previos:**
-```bash
-pip install selenium
-```
-
-**Ejecutar test individual:**
-```bash
-python src/tests/testSelenium.py
-```
-
-**Ejecutar todos los tests:**
-```bash
-python src/tests/run_tests.py
-```
+Suite completa de pruebas E2E con Selenium:
+- **test_auth.py**: Suite principal con 26 tests de autenticación
+- **config.py**: Configuración centralizada (URL, timeouts)
+- **usuarios_test.csv**: 26 casos de prueba (15 registro + 11 login)
+- **run_tests.bat**: Script de ejecución para Windows
+- **run_tests.sh**: Script de ejecución para Linux/Mac
+- **requirements.txt**: Dependencias Python (selenium, webdriver-manager)
 
 ## 🔧 Instalación
 
@@ -227,59 +218,94 @@ npm run lint
 
 ## 🧪 Testing
 
-El proyecto incluye una suite completa de tests automatizados con Selenium.
+El proyecto incluye una suite completa de **26 tests automatizados E2E** con Selenium para validar el sistema de autenticación.
 
-### Instalación de Dependencias de Testing
+### Ejecutar Tests
+
 ```bash
+# Windows
 cd src/tests
-pip install -r requirements.txt
+.\run_tests.bat
+
+# Linux/Mac
+cd src/tests
+./run_tests.sh
 ```
 
-### Ejecutar Tests Completos
+**Opción 2: Ejecución Manual**
 ```bash
-# Los tests se ejecutan contra producción: https://exdigital.vercel.app
 cd src/tests
 python test_auth.py
 ```
 
-### Ejecutar Tests Individuales
-```bash
-cd src/tests
-python test_individual.py
+### Configuración de Tests
+
+Los tests están configurados para ejecutarse contra **producción**:
+```
+URL: https://exdigital.vercel.app
 ```
 
-### Testear en Desarrollo Local
-Para testear contra `http://localhost:3000`, edita `test_auth.py`:
+Para testear en desarrollo local (`http://localhost:3000`), edita `config.py`:
 ```python
-test = TestAuth(base_url="http://localhost:3000")
+BASE_URL = "http://localhost:3000"
 ```
 
-### Casos de Prueba Incluidos
-- **26 casos de prueba automatizados**
-  - 15 tests de registro (válidos e inválidos)
-  - 11 tests de login (válidos e inválidos)
+### Suite de Tests (26 casos de prueba)
+
+#### Tests de Registro (15 casos)
+- ✅ Registro válido con `@duoc.cl`
+- ✅ Registro válido con `@profesor.duoc.cl`
+- ✅ Registro válido con `@gmail.com`
+- ❌ Dominios no permitidos (`@hotmail.com`, `@yahoo.com`)
+- ❌ Contraseña muy corta (< 6 caracteres)
+- ❌ Contraseñas no coinciden
+- ❌ Email sin formato válido
+- ❌ Campos vacíos
+- ❌ Usuario ya registrado
+
+#### Tests de Login (11 casos)
+- ✅ Login con credenciales correctas (5 usuarios)
+- ❌ Usuario no registrado
+- ❌ Contraseña incorrecta
+- ❌ Email sin formato válido
+- ❌ Campos vacíos
+- ❌ Case sensitivity en email
 
 ### Estructura de Tests
 ```
 src/tests/
-├── test_auth.py           # Suite completa de tests
-├── test_individual.py     # Tests individuales interactivos
-├── usuarios_test.csv      # 26 casos de prueba
-├── requirements.txt       # Dependencias Python
-└── README.md             # Documentación detallada de testing
+├── test_auth.py           # Suite principal de 26 tests
+├── config.py              # Configuración (URL, timeouts, delays)
+├── usuarios_test.csv      # Datos de prueba
+├── requirements.txt       # selenium>=4.15.0, webdriver-manager>=4.0.0
+├── run_tests.bat          # Script de ejecución Windows
+├── run_tests.sh           # Script de ejecución Linux/Mac
+├── README.md              # Documentación detallada
+└── CHANGELOG_TESTS.md     # Historial de cambios
 ```
 
-### Resultados Esperados
+### Resultado Esperado
 ```
 ============================================================
-📊 RESUMEN DE TESTS
+RESUMEN DE TESTS
 ============================================================
 Total de tests: 26
-✅ Exitosos: 24-26
-❌ Fallidos: 0-2
-📈 Porcentaje de éxito: 92-100%
+[OK] Exitosos: 26
+[ERROR] Fallidos: 0
+Porcentaje de éxito: 100.0%
 ============================================================
 ```
+
+### Características de los Tests
+- 🔄 Limpieza automática de localStorage entre tests
+- 🔐 Cierre de sesión mediante UI antes de cada test
+- ⏱️ Timeouts y esperas explícitas configurables
+- 📊 CSV con casos de prueba fácilmente extensibles
+- 🎯 Validación de redirecciones y protección de rutas
+- 📝 Logs detallados de cada operación
 
 Para más información sobre los tests, consulta [src/tests/README.md](src/tests/README.md)
 
+## 📄 Licencia
+
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
