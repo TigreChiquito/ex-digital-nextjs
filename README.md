@@ -12,7 +12,6 @@ Tienda en línea de productos tecnológicos desarrollada con Next.js 15, React 1
 - [Rutas Disponibles](#rutas-disponibles)
 - [Validaciones del Sistema](#validaciones-del-sistema)
 - [Testing](#testing)
-- [Contribuir](#contribuir)
 - [Licencia](#licencia)
 
 ## ✨ Características
