@@ -187,9 +187,11 @@ export default function Home() {
               <p className="text-white/95 text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
                 Contáctanos y te ayudaremos a encontrar el periférico perfecto para ti
               </p>
-              <button className="bg-white text-orange-600 px-10 py-5 rounded-2xl font-black text-xl hover:bg-stone-100 transition-all shadow-2xl hover:scale-105 border-2 border-white/20">
-                Contactar Ahora
-              </button>
+              <Link href="/contacto">
+                <button className="bg-white text-orange-600 px-10 py-5 rounded-2xl font-black text-xl hover:bg-stone-100 transition-all shadow-2xl hover:scale-105 border-2 border-white/20">
+                  Contactar Ahora
+                </button>
+              </Link>
             </div>
           </div>
         </div>
