@@ -108,6 +108,33 @@ export const productos: Producto[] = [
     img2: "/img/productos/g513-carbon-gallery-2.webp",
     img3: "/img/productos/g513-carbon-gallery-2.webp",
     descripcion: "Teclado económico con diseño compacto y funcional. Ideal para quienes buscan practicidad a bajo costo."
+  },
+  {
+    nombre: "Astro A50 X",
+    precio: 45000,
+    categoria: "Auriculares",
+    img: "/img/productos/astro-a50-x-white-gallery-1.webp",
+    img2: "/img/productos/astro-a50-x-white-gallery-1.webp",
+    img3: "/img/productos/astro-a50-x-white-gallery-1.webp",
+    descripcion: "Auriculares inalámbricos premium con audio espacial y base de carga. Diseñados para gamers profesionales que buscan lo mejor."
+  },
+  {
+    nombre: "A50 McLaren Edition",
+    precio: 52000,
+    categoria: "Auriculares",
+    img: "/img/productos/a50x-mclaren-3qtr-left-angle-gallery-1-new.webp",
+    img2: "/img/productos/a50x-mclaren-3qtr-left-angle-gallery-1-new.webp",
+    img3: "/img/productos/a50x-mclaren-3qtr-left-angle-gallery-1-new.webp",
+    descripcion: "Edición limitada McLaren con diseño exclusivo y tecnología de audio avanzada. Estilo y rendimiento de competición."
+  },
+  {
+    nombre: "G733",
+    precio: 28000,
+    categoria: "Auriculares",
+    img: "/img/productos/g733-lilac-gallery-1.webp",
+    img2: "/img/productos/g733-lilac-gallery-1.webp",
+    img3: "/img/productos/g733-lilac-gallery-1.webp",
+    descripcion: "Auriculares inalámbricos ultraligeros con diseño moderno en color lila. Comodidad extrema y RGB personalizable."
   }
 ];
 
