@@ -3,14 +3,43 @@
 import { useState, useMemo } from 'react';
 import { productos } from '@/data/productos';
 import { useCart } from '@/context/CartContext';
+import { Producto } from '@/context/CartContext';
 import { Flame, TrendingDown, Clock, ArrowLeft, Filter } from 'lucide-react';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import ProductModal from '@/components/ProductModal';
 
 export default function OfertasPage() {
     const { agregarAlCarrito } = useCart();
     const [filtroDescuento, setFiltroDescuento] = useState<string>('todos');
     const [ordenar, setOrdenar] = useState<string>('descuento-mayor');
+    const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleAgregarClick = (producto: Producto) => {
+        setSelectedProduct(producto);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmarAgregar = (producto: Producto, cantidad: number) => {
+        agregarAlCarrito(producto, cantidad);
+
+        // Notificación elegante
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-pink-500';
+        notification.innerHTML = `
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <div>
+                <p class="font-bold">${producto.nombre}</p>
+                <p class="text-sm opacity-90">Agregado al carrito (x${cantidad})</p>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.remove(), 3000);
+    };
 
     // Filtrar productos en oferta activa
     const productosEnOferta = useMemo(() => {
@@ -172,7 +201,7 @@ export default function OfertasPage() {
                             <div key={producto.nombre} className="animate-scale-in" style={{ animationDelay: `${index * 0.05}s` }}>
                                 <ProductCard
                                     producto={producto}
-                                    onAgregar={agregarAlCarrito}
+                                    onAgregar={handleAgregarClick}
                                 />
                             </div>
                         ))}
@@ -187,6 +216,14 @@ export default function OfertasPage() {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Producto */}
+            <ProductModal
+                producto={selectedProduct}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmarAgregar}
+            />
         </div>
     );
 }
