@@ -40,6 +40,7 @@ export default function CheckoutPage() {
     const [indicaciones, setIndicaciones] = useState('');
     const [error, setError] = useState('');
     const [procesando, setProcesando] = useState(false);
+    const [pagoExitoso, setPagoExitoso] = useState(false);
 
     // Auto-completar datos del usuario
     useEffect(() => {
@@ -50,12 +51,12 @@ export default function CheckoutPage() {
         }
     }, [usuario, estaLogueado]);
 
-    // Redirigir si el carrito está vacío
+    // Redirigir si el carrito está vacío (excepto si el pago fue exitoso)
     useEffect(() => {
-        if (carrito.length === 0) {
+        if (carrito.length === 0 && !pagoExitoso) {
             router.push('/carrito');
         }
-    }, [carrito, router]);
+    }, [carrito, router, pagoExitoso]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -81,35 +82,42 @@ export default function CheckoutPage() {
         setProcesando(true);
 
         setTimeout(() => {
-            // Aquí irías a tu API de pago
-            console.log('Pedido procesado:', {
-                cliente: { nombre, apellido, email, telefono },
-                direccion: { calle, departamento, region, comuna, indicaciones },
-                productos: carrito,
-                total: obtenerTotal()
-            });
+            // Randomizador 50/50
+            const exito = Math.random() < 0.5;
 
-            // Vaciar carrito
-            vaciarCarrito();
+            if (exito) {
+                // PAGO EXITOSO
+                setPagoExitoso(true); // Marcar como exitoso para prevenir redirección
+                
+                const datosCompra = {
+                    cliente: { nombre, apellido, email, telefono },
+                    direccion: { calle, departamento, region, comuna, indicaciones },
+                    productos: carrito,
+                    subtotal: total,
+                    envio: envio,
+                    total: totalFinal,
+                    fecha: new Date().toISOString(),
+                    numeroOrden: `EXD-${Date.now()}`
+                };
 
-            // Mostrar notificación de éxito
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-green-500';
-            notification.innerHTML = `
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <div>
-          <p class="font-bold">¡Pedido realizado!</p>
-          <p class="text-sm opacity-90">Te enviaremos un email de confirmación</p>
-        </div>
-      `;
-            document.body.appendChild(notification);
+                // Guardar datos en localStorage
+                localStorage.setItem('ultimaCompra', JSON.stringify(datosCompra));
 
-            setTimeout(() => {
-                notification.remove();
-                router.push('/');
-            }, 2000);
+                // Vaciar carrito
+                vaciarCarrito();
+
+                // Redirigir a página de boleta con un pequeño delay
+                setTimeout(() => {
+                    router.push('/boleta');
+                }, 100);
+            } else {
+                // PAGO FALLIDO
+                setProcesando(false);
+                setError('Error al procesar el pago. El servidor bancario no está disponible en este momento. Por favor, intenta nuevamente en unos minutos.');
+
+                // Scroll al error
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }, 2000);
     };
 
