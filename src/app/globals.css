@@ -623,3 +623,37 @@ h4 {
   transform: scale(1.2);
   box-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
 }
+
+/* ============================================
+   ANIMACIONES ADICIONALES
+   ============================================ */
+/* Pulse lento para badges de oferta */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Scale in con delay para grid de productos */
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
+  opacity: 0;
+}

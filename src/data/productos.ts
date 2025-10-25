@@ -3,21 +3,37 @@ import { Producto } from '@/context/CartContext';
 export const productos: Producto[] = [
   {
     nombre: "CA-9011379",
-    precio: 10000,
+    precio: 7500,
     categoria: "Auriculares",
     img: "/img/productos/CA-9011379-WW_01.avif",
     img2: "/img/productos/CA-9011379-WW_13.avif",
     img3: "/img/productos/s-l400.jpg",
-    descripcion: "Auriculares gaming de alta calidad con micrófono integrado y sonido envolvente. Perfectos para largas sesiones de juego."
+    descripcion: "Auriculares gaming de alta calidad con micrófono integrado y sonido envolvente. Perfectos para largas sesiones de juego.",
+    oferta: {
+      activa: true,
+      precioOriginal: 10000,
+      descuento: 25,
+      fechaInicio: "2025-10-01",
+      fechaFin: "2025-11-30",
+      etiqueta: "Oferta de Primavera"
+    }
   },
   {
     nombre: "G213",
-    precio: 15000,
+    precio: 10500,
     categoria: "Teclados",
     img: "/img/productos/g213-gallery-1-nb.webp",
     img2: "/img/productos/marcaslogitech29logkg213-negro1jpeg_0.webp",
     img3: "/img/productos/g213prodigygamingkeyboard20(2).webp",
-    descripcion: "Teclado gamer retroiluminado con teclas resistentes y rápidas. Ideal para mejorar tu rendimiento en cada partida."
+    descripcion: "Teclado gamer retroiluminado con teclas resistentes y rápidas. Ideal para mejorar tu rendimiento en cada partida.",
+    oferta: {
+      activa: true,
+      precioOriginal: 15000,
+      descuento: 30,
+      fechaInicio: "2025-10-01",
+      fechaFin: "2025-11-30",
+      etiqueta: "Oferta de Primavera"
+    }
   },
   {
     nombre: "G513",
@@ -66,12 +82,20 @@ export const productos: Producto[] = [
   },
   {
     nombre: "VIRTUOSO_MAX",
-    precio: 11500,
+    precio: 8050,
     categoria: "Auriculares",
     img: "/img/productos/VIRTUOSO_MAX_WIRELESS_CRBN_01.avif",
     img2: "/img/productos/VIRTUOSO_MAX_WIRELESS_CRBN_01.avif",
     img3: "/img/productos/VIRTUOSO_MAX_WIRELESS_CRBN_01.avif",
-    descripcion: "Auriculares inalámbricos premium con sonido de alta fidelidad y micrófono desmontable. Experiencia inmersiva total."
+    descripcion: "Auriculares inalámbricos premium con sonido de alta fidelidad y micrófono desmontable. Experiencia inmersiva total.",
+    oferta: {
+      activa: true,
+      precioOriginal: 11500,
+      descuento: 30,
+      fechaInicio: "2025-10-01",
+      fechaFin: "2025-11-30",
+      etiqueta: "Oferta de Primavera"
+    }
   },
   {
     nombre: "M4Xy",

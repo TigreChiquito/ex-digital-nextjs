@@ -8,21 +8,34 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ShoppingCart, Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig'; // 👈 NUEVO: Importar config
+import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig';
+import { productos } from '@/data/productos';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
-    const [showCategoriasMenu, setShowCategoriasMenu] = useState<boolean>(false); // 👈 NUEVO
+    const [showCategoriasMenu, setShowCategoriasMenu] = useState<boolean>(false);
+    const [showCategoriasMobile, setShowCategoriasMobile] = useState<boolean>(false); // Nuevo estado para mobile
     const categoriasTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const { obtenerCantidadTotal } = useCart();
     const { usuario, cerrarSesion, estaLogueado } = useAuth();
 
     const cantidadProductos = obtenerCantidadTotal();
+
+    // Verificar si hay ofertas activas
+    const hayOfertasActivas = useMemo(() => {
+        const hoy = new Date();
+        return productos.some(producto => {
+            if (!producto.oferta?.activa) return false;
+            const fechaInicio = new Date(producto.oferta.fechaInicio);
+            const fechaFin = new Date(producto.oferta.fechaFin);
+            return hoy >= fechaInicio && hoy <= fechaFin;
+        });
+    }, []);
 
     // Función para mostrar menú de categorías
     const handleShowCategorias = () => {
@@ -47,6 +60,13 @@ export default function Navbar() {
             }
         };
     }, []);
+
+    // Cerrar dropdown de categorías cuando se cierra el menú móvil
+    useEffect(() => {
+        if (!isOpen) {
+            setShowCategoriasMobile(false);
+        }
+    }, [isOpen]);
 
     const handleCerrarSesion = () => {
         cerrarSesion();
@@ -127,6 +147,17 @@ export default function Navbar() {
                                 )}
                             </div>
                             {/* ========== FIN MENÚ DE CATEGORÍAS ========== */}
+
+                            {/* Botón de Ofertas - Solo si hay ofertas activas */}
+                            {hayOfertasActivas && (
+                                <Link
+                                    href="/ofertas"
+                                    className="text-stone-300 hover:text-orange-400 font-semibold transition-all px-4 py-2 rounded-xl hover:bg-stone-800 flex items-center space-x-1"
+                                >
+                                    <span>Ofertas</span>
+                                    <span className="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded-full font-bold">%</span>
+                                </Link>
+                            )}
 
                             <Link
                                 href="/nosotros"
@@ -231,25 +262,49 @@ export default function Navbar() {
                                 Productos
                             </Link>
 
-                            {/* ========== CATEGORÍAS EN MOBILE ========== */}
-                            <div className="py-2 px-4">
-                                <p className="text-xs text-stone-500 font-bold uppercase tracking-wide mb-2">Categorías</p>
-                                <div className="space-y-1">
-                                    {/* Mapear categorías */}
-                                    {Object.values(categoriasConfig).map((cat: CategoriaConfig) => (
-                                        <Link
-                                            key={cat.slug}
-                                            href={`/categorias/${cat.slug}`}
-                                            className="py-2 px-3 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-lg transition-colors flex items-center space-x-2"
-                                            onClick={() => setIsOpen(false)}
-                                        >
-                                            <span className="text-xl">{cat.icon}</span>
-                                            <span className="font-medium">{cat.nombre}</span>
-                                        </Link>
-                                    ))}
-                                </div>
+                            {/* ========== CATEGORÍAS EN MOBILE (DESPLEGABLE) ========== */}
+                            <div>
+                                <button
+                                    onClick={() => setShowCategoriasMobile(!showCategoriasMobile)}
+                                    className="w-full flex items-center justify-between py-3 px-4 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-xl transition-colors font-semibold"
+                                >
+                                    <span>Categorías</span>
+                                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showCategoriasMobile ? 'rotate-180' : ''}`} />
+                                </button>
+                                
+                                {/* Dropdown de categorías */}
+                                {showCategoriasMobile && (
+                                    <div className="mt-2 ml-4 space-y-1 animate-slide-up">
+                                        {Object.values(categoriasConfig).map((cat: CategoriaConfig) => (
+                                            <Link
+                                                key={cat.slug}
+                                                href={`/categorias/${cat.slug}`}
+                                                className="py-2 px-3 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-lg transition-colors flex items-center space-x-2"
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    setShowCategoriasMobile(false);
+                                                }}
+                                            >
+                                                <span className="text-xl">{cat.icon}</span>
+                                                <span className="font-medium">{cat.nombre}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             {/* ========== FIN CATEGORÍAS MOBILE ========== */}
+
+                            {/* Botón de Ofertas - Solo si hay ofertas activas */}
+                            {hayOfertasActivas && (
+                                <Link
+                                    href="/ofertas"
+                                    className="flex items-center space-x-2 py-3 px-4 text-stone-300 hover:text-orange-400 hover:bg-stone-800 rounded-xl transition-colors font-semibold"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <span>Ofertas</span>
+                                    <span className="text-xs bg-red-600 text-white px-2 py-1 rounded-full font-bold">%</span>
+                                </Link>
+                            )}
 
                             <Link
                                 href="/nosotros"

@@ -11,6 +11,14 @@ export interface Producto {
     img3?: string;
     descripcion: string;
     categoria: string;
+    oferta?: {
+        activa: boolean;
+        precioOriginal: number;
+        descuento: number;
+        fechaInicio: string;
+        fechaFin: string;
+        etiqueta?: string;
+    };
 }
 
 export interface ProductoCarrito extends Producto {

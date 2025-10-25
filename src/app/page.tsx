@@ -1,18 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Carousel from '@/components/Carousel';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import { useCart } from '@/context/CartContext';
 import { productos } from '@/data/productos';
 import { Producto } from '@/context/CartContext';
-import { Sparkles, Zap, Shield, Heart } from 'lucide-react';
+import { Sparkles, Zap, Shield, Heart, Flame, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { agregarAlCarrito } = useCart();
+
+  // Verificar si hay productos en oferta activa
+  const productosEnOferta = productos.filter(producto => {
+    if (!producto.oferta?.activa) return false;
+    
+    const hoy = new Date();
+    const fechaInicio = new Date(producto.oferta.fechaInicio);
+    const fechaFin = new Date(producto.oferta.fechaFin);
+    
+    return hoy >= fechaInicio && hoy <= fechaFin;
+  });
 
   const handleAgregarClick = (producto: Producto) => {
     setSelectedProduct(producto);
@@ -45,6 +57,46 @@ export default function Home() {
       <div className="w-full">
         <Carousel />
       </div>
+
+      {/* Banner de ofertas - Solo si hay ofertas activas */}
+      {productosEnOferta.length > 0 && (
+        <div className="py-8 px-4">
+          <div className="container mx-auto">
+            <Link href="/ofertas" className="block">
+              <div className="relative bg-gradient-to-r from-pink-900 via-rose-900 to-orange-900 rounded-3xl p-8 md:p-12 border-2 border-pink-700 hover:border-pink-600 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-pink-600/40 group overflow-hidden">
+                {/* Efecto de brillo animado */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <div className="relative flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+                  {/* Contenido izquierdo */}
+                  <div className="flex items-center space-x-4">
+                    <Flame className="w-16 h-16 md:w-20 md:h-20 text-pink-300 animate-pulse" />
+                    <div>
+                      <h2 className="text-3xl md:text-4xl font-black text-white mb-2">
+                        ¡Ofertas de Primavera!
+                      </h2>
+                      <p className="text-pink-200 text-lg md:text-xl">
+                        Hasta {Math.max(...productosEnOferta.map(p => p.oferta?.descuento || 0))}% de descuento en productos seleccionados
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Contenido derecho */}
+                  <div className="flex flex-col items-center md:items-end space-y-3">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-3 rounded-full font-black text-xl animate-bounce border-2 border-yellow-300/50">
+                      {productosEnOferta.length} PRODUCTOS
+                    </div>
+                    <div className="flex items-center space-x-2 text-white font-bold group-hover:translate-x-2 transition-transform">
+                      <span>Ver todas las ofertas</span>
+                      <ArrowRight className="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Sección de características - Estilo oscuro y acogedor */}
       <div className="py-16 px-4">
