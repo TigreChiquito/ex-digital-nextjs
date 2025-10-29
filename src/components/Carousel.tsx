@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
 
 interface Slide {
     img: string;
@@ -31,6 +30,7 @@ const slides: Slide[] = [
 export default function Carousel() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [imageError, setImageError] = useState<{ [key: number]: boolean }>({});
+    const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -49,7 +49,12 @@ export default function Carousel() {
     };
 
     const handleImageError = (index: number) => {
+        console.error(`Error loading image: ${slides[index].img}`);
         setImageError(prev => ({ ...prev, [index]: true }));
+    };
+
+    const handleImageLoad = (index: number) => {
+        setImageLoaded(prev => ({ ...prev, [index]: true }));
     };
 
     return (
@@ -62,14 +67,12 @@ export default function Carousel() {
                         }`}
                 >
                     {!imageError[index] ? (
-                        <Image
+                        <img
                             src={slide.img}
                             alt={slide.title}
-                            fill
-                            sizes="100vw"
-                            className="object-cover"
-                            priority={index === 0}
+                            className="w-full h-full object-cover"
                             onError={() => handleImageError(index)}
+                            onLoad={() => handleImageLoad(index)}
                         />
                     ) : (
                         // Fallback con gradiente oscuro cálido
