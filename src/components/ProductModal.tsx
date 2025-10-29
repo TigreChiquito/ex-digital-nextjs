@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart, Flame, TrendingDown } from 'lucide-react';
 import { Producto } from '@/context/CartContext';
-import Image from 'next/image';
 
 interface ProductModalProps {
     producto: Producto | null;
@@ -122,13 +121,10 @@ export default function ProductModal({ producto, isOpen, onClose, onConfirm }: P
                             <div className={`relative h-80 bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 rounded-3xl overflow-hidden border-2 ${
                                 enOferta ? 'border-pink-700/50' : 'border-stone-800'
                             }`}>
-                                <Image
+                                <img
                                     src={imagenes[currentImage]}
                                     alt={producto.nombre}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    className="object-contain p-8"
-                                    priority
+                                    className="w-full h-full object-contain p-8"
                                 />
 
                                 {imagenes.length > 1 && (
