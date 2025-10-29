@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, CreditCard, X, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function CarritoPage() {
     const { carrito, eliminarDelCarrito, actualizarCantidad, obtenerTotal, vaciarCarrito } = useCart();
@@ -102,11 +103,13 @@ export default function CarritoPage() {
                                 <div className="flex flex-col sm:flex-row gap-6">
                                     {/* Imagen del producto */}
                                     <div className="flex-shrink-0">
-                                        <div className="w-full sm:w-32 h-32 bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl overflow-hidden border-2 border-stone-700">
-                                            <img
+                                        <div className="relative w-full sm:w-32 h-32 bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl overflow-hidden border-2 border-stone-700">
+                                            <Image
                                                 src={item.img}
                                                 alt={item.nombre}
-                                                className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                                                fill
+                                                sizes="(max-width: 640px) 100vw, 128px"
+                                                className="object-contain p-4 group-hover:scale-110 transition-transform duration-300"
                                             />
                                         </div>
                                     </div>
@@ -265,7 +268,7 @@ export default function CarritoPage() {
                             {/* Botón de compra */}
                             <Link
                                 href="/checkout"
-                                className="block w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-xl hover:shadow-2xl hover:shadow-teal-600/50 hover:scale-105 flex items-center justify-center space-x-2 mb-4 text-center"
+                                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-xl hover:shadow-2xl hover:shadow-teal-600/50 hover:scale-105 flex items-center justify-center space-x-2 mb-4"
                             >
                                 <CreditCard className="w-5 h-5" />
                                 <span>Proceder al Pago</span>

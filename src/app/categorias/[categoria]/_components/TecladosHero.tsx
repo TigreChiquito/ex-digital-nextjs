@@ -2,8 +2,6 @@
 
 // Hero específico para TECLADOS con colores naranja/rojo
 
-import { Keyboard, Zap, Gauge, Sparkles } from 'lucide-react';
-
 export default function TecladosHero() {
     return (
         // Gradiente naranja/rojo

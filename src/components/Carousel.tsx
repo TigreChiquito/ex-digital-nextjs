@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface Slide {
     img: string;
@@ -61,10 +62,13 @@ export default function Carousel() {
                         }`}
                 >
                     {!imageError[index] ? (
-                        <img
+                        <Image
                             src={slide.img}
                             alt={slide.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="100vw"
+                            className="object-cover"
+                            priority={index === 0}
                             onError={() => handleImageError(index)}
                         />
                     ) : (

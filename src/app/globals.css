@@ -657,3 +657,42 @@ h4 {
   animation: scale-in 0.4s ease-out forwards;
   opacity: 0;
 }
+
+/* ============================================
+   OPTIMIZACIÓN DE IMÁGENES
+   ============================================ */
+/* Placeholder blur para carga de imágenes */
+.img-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(120, 113, 108, 0.2) 0%,
+    rgba(168, 162, 158, 0.3) 50%,
+    rgba(120, 113, 108, 0.2) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Transición suave de carga de imagen */
+.img-loaded {
+  animation: fade-in 0.3s ease-in;
+}
+
+/* Prevenir layout shift */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}

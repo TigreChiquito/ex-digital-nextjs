@@ -2,6 +2,7 @@
 
 import { Producto } from '@/context/CartContext';
 import { ShoppingCart, Sparkles, Flame, TrendingDown } from 'lucide-react';
+import Image from 'next/image';
 
 interface ProductCardProps {
     producto: Producto;
@@ -31,10 +32,13 @@ export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
         }`}>
             {/* Imagen con fondo más claro para contraste */}
             <div className="relative h-56 bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden">
-                <img
+                <Image
                     src={producto.img}
                     alt={producto.nombre}
-                    className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
+                    priority={false}
                 />
 
                 {/* Badge de oferta o nuevo */}

@@ -2,6 +2,7 @@
 
 import { Calendar, ArrowRight, X } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const blogPosts = [
     {
@@ -112,10 +113,13 @@ export default function BlogPage() {
                                 <div className={`grid grid-cols-1 lg:grid-cols-2 ${index % 2 === 0 ? '' : 'lg:grid-flow-col-dense'}`}>
                                     {/* Imagen */}
                                     <div className={`relative h-80 lg:h-auto overflow-hidden ${index % 2 === 0 ? '' : 'lg:order-2'}`}>
-                                        <img
+                                        <Image
                                             src={post.image}
                                             alt={post.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            fill
+                                            sizes="(max-width: 1024px) 100vw, 50vw"
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                            priority={index === 0}
                                             onError={(e) => {
                                                 e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23374151" width="400" height="300"/%3E%3Ctext fill="%239CA3AF" font-family="sans-serif" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
                                             }}
@@ -184,10 +188,13 @@ export default function BlogPage() {
 
                             {/* Imagen destacada */}
                             <div className="relative h-80 overflow-hidden">
-                                <img
+                                <Image
                                     src={selectedPost.image}
                                     alt={selectedPost.title}
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 800px"
+                                    className="object-cover"
+                                    priority
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900 to-transparent"></div>
                             </div>

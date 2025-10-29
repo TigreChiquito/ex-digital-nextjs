@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { CheckCircle, Package, MapPin, Calendar, CreditCard, Mail, Phone, Home } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface DatosCompra {
     cliente: {
@@ -183,11 +184,13 @@ export default function BoletaPage() {
                                         key={index} 
                                         className="flex items-center space-x-4 pb-4 border-b border-stone-700 last:border-0 last:pb-0"
                                     >
-                                        <div className="w-16 h-16 bg-stone-700 rounded-xl overflow-hidden flex-shrink-0">
-                                            <img
+                                        <div className="relative w-16 h-16 bg-stone-700 rounded-xl overflow-hidden flex-shrink-0">
+                                            <Image
                                                 src={producto.img}
                                                 alt={producto.nombre}
-                                                className="w-full h-full object-contain p-2"
+                                                fill
+                                                sizes="64px"
+                                                className="object-contain p-2"
                                             />
                                         </div>
                                         <div className="flex-1">

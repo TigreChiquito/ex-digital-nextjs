@@ -3,8 +3,6 @@
 // Este es el Hero (cabecera grande) que aparece SOLO en la página de Auriculares
 // Tiene fondo púrpura/rosa y muestra features específicas de auriculares
 
-import { Volume2, Headphones, Radio, Mic } from 'lucide-react';
-
 export default function AuricularesHero() {
     return (
         // Contenedor principal con gradiente púrpura/rosa

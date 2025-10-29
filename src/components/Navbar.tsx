@@ -14,6 +14,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig';
 import { productos } from '@/data/productos';
+import Image from 'next/image';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -80,12 +81,15 @@ export default function Navbar() {
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
                         <Link href="/" className="flex items-center group">
-                            <div className="relative">
+                            <div className="relative w-14 h-14">
                                 <div className="absolute inset-0 bg-orange-600 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                                <img
+                                <Image
                                     src="/img/utilidades/1da7323a-a0f4-4f5c-90a1-5844b22203c5.png"
                                     alt="Logo"
-                                    className="relative w-14 h-14 rounded-full ring-2 ring-orange-600 group-hover:ring-orange-500 transition-all group-hover:scale-110 shadow-lg"
+                                    width={56}
+                                    height={56}
+                                    className="relative rounded-full ring-2 ring-orange-600 group-hover:ring-orange-500 transition-all group-hover:scale-110 shadow-lg"
+                                    priority
                                 />
                             </div>
                         </Link>

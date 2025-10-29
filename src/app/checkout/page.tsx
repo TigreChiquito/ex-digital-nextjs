@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { CreditCard, MapPin, User, Mail, Phone, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const regiones = [
     'Región Metropolitana de Santiago',
@@ -365,11 +366,13 @@ export default function CheckoutPage() {
                             <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                                 {carrito.map((item, index) => (
                                     <div key={index} className="flex items-center space-x-3 pb-4 border-b border-stone-800">
-                                        <div className="w-16 h-16 bg-stone-800 rounded-xl overflow-hidden flex-shrink-0">
-                                            <img
+                                        <div className="relative w-16 h-16 bg-stone-800 rounded-xl overflow-hidden flex-shrink-0">
+                                            <Image
                                                 src={item.img}
                                                 alt={item.nombre}
-                                                className="w-full h-full object-contain p-2"
+                                                fill
+                                                sizes="64px"
+                                                className="object-contain p-2"
                                             />
                                         </div>
                                         <div className="flex-1 min-w-0">

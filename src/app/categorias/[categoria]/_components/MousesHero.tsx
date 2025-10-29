@@ -2,8 +2,6 @@
 
 // Hero específico para MOUSES con colores teal/cyan
 
-import { Mouse, Target, Boxes, Settings } from 'lucide-react';
-
 export default function MousesHero() {
     return (
         // Gradiente teal/cyan

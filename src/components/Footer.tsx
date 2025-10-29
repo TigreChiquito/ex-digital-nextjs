@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export default function Footer() {
     return (
         <footer className="bg-stone-900/90 backdrop-blur-md border-t-2 border-stone-800 mt-auto py-12">
@@ -5,12 +7,15 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                     {/* Logo */}
                     <div className="md:col-span-2 flex justify-center">
-                        <div className="relative group">
+                        <div className="relative group w-24 h-24">
                             <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-teal-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                            <img
+                            <Image
                                 src="/img/utilidades/1da7323a-a0f4-4f5c-90a1-5844b22203c5.png"
                                 alt="Logo Empresa"
-                                className="relative w-24 h-24 rounded-full shadow-2xl ring-4 ring-orange-600/50 group-hover:ring-orange-500 group-hover:scale-110 transition-all"
+                                width={96}
+                                height={96}
+                                className="relative rounded-full shadow-2xl ring-4 ring-orange-600/50 group-hover:ring-orange-500 group-hover:scale-110 transition-all"
+                                priority
                             />
                         </div>
                     </div>
