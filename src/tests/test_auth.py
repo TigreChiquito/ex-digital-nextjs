@@ -311,7 +311,7 @@ def ejecutar_tests_desde_csv(csv_file):
                 try:
                     _ = test.driver.current_url
                 except Exception as e:
-                    print(f"\n⚠️  Navegador cerrado inesperadamente. Reiniciando...")
+                    print(f"\n[WARN] Navegador cerrado inesperadamente. Reiniciando...")
                     test.teardown()
                     test.setup()
                     test.driver.get(test.base_url)
