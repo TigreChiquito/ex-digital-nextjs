@@ -46,7 +46,6 @@ export default function ContactoPage() {
             return;
         }
 
-        // Simular envío (aquí irías a tu API)
         console.log('Mensaje enviado:', { nombre, email, asunto, mensaje });
 
         // Mostrar mensaje de éxito

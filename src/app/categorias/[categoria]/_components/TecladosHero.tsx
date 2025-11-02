@@ -1,7 +1,3 @@
-// 📍 UBICACIÓN: src/app/categorias/[categoria]/_components/TecladosHero.tsx
-
-// Hero específico para TECLADOS con colores naranja/rojo
-
 export default function TecladosHero() {
     return (
         // Gradiente naranja/rojo

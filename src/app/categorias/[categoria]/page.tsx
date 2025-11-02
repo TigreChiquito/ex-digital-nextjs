@@ -1,8 +1,3 @@
-// 📍 UBICACIÓN: src/app/categorias/[categoria]/page.tsx
-
-// PÁGINA DINÁMICA que se renderiza según la categoría en la URL
-// Ejemplo: /categorias/teclados → params.categoria = 'teclados'
-
 'use client';
 
 import { useState, useMemo, use } from 'react';
@@ -25,18 +20,18 @@ import MousesHero from './_components/MousesHero';
 type TipoOrdenamiento = '' | 'menor' | 'mayor' | 'nombre';
 
 export default function CategoriaPage({ params }: { params: Promise<{ categoria: string }> }) {
-    // 1️⃣ Obtener el slug de la URL (ej: 'teclados')
+    // 1. Obtener el slug de la URL (ej: 'teclados')
     const { categoria } = use(params);
     
-    // 2️⃣ Buscar la configuración de esa categoría
+    // 2. Buscar la configuración de esa categoría
     const config = getConfigBySlug(categoria);
 
-    // 3️⃣ Si no existe la categoría, mostrar 404
+    // 3. Si no existe la categoría, mostrar 404
     if (!config) {
         notFound(); // Redirige a not-found.tsx
     }
 
-    // 4️⃣ Seleccionar el Hero correcto según la categoría
+    // 4. Seleccionar el Hero correcto según la categoría
     const HeroComponents: Record<string, React.ComponentType> = {
         'auriculares': AuricularesHero,  // URL: /categorias/auriculares → Hero Púrpura
         'teclados': TecladosHero,        // URL: /categorias/teclados → Hero Naranja
@@ -45,16 +40,16 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
 
     const HeroComponent = HeroComponents[categoria];
 
-    // 5️⃣ Estados para el modal y carrito
+    // 5. Estados para el modal y carrito
     const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { agregarAlCarrito } = useCart();
 
-    // 6️⃣ FILTRAR productos solo de esta categoría
+    // 6. FILTRAR productos solo de esta categoría
     // Ejemplo: Si estamos en /categorias/teclados, solo muestra productos con categoria: "Teclados"
     const productosCategoria = productos.filter(p => p.categoria === config.nombre);
 
-    // 7️⃣ Calcular precios mín/máx de los productos de esta categoría
+    // 7. Calcular precios mín/máx de los productos de esta categoría
     const precioMinProducto = useMemo(() => 
         Math.min(...productosCategoria.map(p => p.precio)), 
         [productosCategoria]
@@ -64,14 +59,14 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         [productosCategoria]
     );
 
-    // 8️⃣ Estados para filtros
+    // 8. Estados para filtros
     const [searchTerm, setSearchTerm] = useState('');
     const [precioMin, setPrecioMin] = useState(precioMinProducto);
     const [precioMax, setPrecioMax] = useState(precioMaxProducto);
     const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('');
     const [showFilters, setShowFilters] = useState(false);
 
-    // 9️⃣ Handlers (funciones que manejan eventos)
+    // 9. Handlers (funciones que manejan eventos)
     const handleAgregarClick = (producto: Producto) => {
         setSelectedProduct(producto);
         setIsModalOpen(true);
@@ -96,7 +91,7 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         setTimeout(() => notification.remove(), 3000);
     };
 
-    // 🔟 Lógica de filtrado
+    // 10. Lógica de filtrado
     const productosFiltrados = productosCategoria.filter(producto => {
         const cumpleNombre = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -104,7 +99,7 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         return cumpleNombre && cumplePrecio;
     });
 
-    // 1️⃣1️⃣ Lógica de ordenamiento
+    // 11. Lógica de ordenamiento
     const productosOrdenados = [...productosFiltrados].sort((a, b) => {
         if (ordenamiento === 'menor') return a.precio - b.precio;
         if (ordenamiento === 'mayor') return b.precio - a.precio;
@@ -112,7 +107,7 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         return 0;
     });
 
-    // 1️⃣2️⃣ Limpiar filtros
+    // 12. Limpiar filtros
     const limpiarFiltros = () => {
         setSearchTerm('');
         setPrecioMin(precioMinProducto);
@@ -125,7 +120,7 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         precioMax !== precioMaxProducto ||
         ordenamiento;
 
-    // 1️⃣3️⃣ RENDERIZADO (lo que se muestra en pantalla)
+    // 13. RENDERIZADO (lo que se muestra en pantalla)
     return (
         <div className="min-h-screen">
             {/* Breadcrumb: Volver a productos */}

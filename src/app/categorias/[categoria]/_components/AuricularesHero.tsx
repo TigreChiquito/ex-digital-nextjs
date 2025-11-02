@@ -1,8 +1,3 @@
-// 📍 UBICACIÓN: src/app/categorias/[categoria]/_components/AuricularesHero.tsx
-
-// Este es el Hero (cabecera grande) que aparece SOLO en la página de Auriculares
-// Tiene fondo púrpura/rosa y muestra features específicas de auriculares
-
 export default function AuricularesHero() {
     return (
         // Contenedor principal con gradiente púrpura/rosa

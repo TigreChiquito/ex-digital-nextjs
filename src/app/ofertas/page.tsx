@@ -24,7 +24,6 @@ export default function OfertasPage() {
     const handleConfirmarAgregar = (producto: Producto, cantidad: number) => {
         agregarAlCarrito(producto, cantidad);
 
-        // Notificación elegante
         const notification = document.createElement('div');
         notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-pink-500';
         notification.innerHTML = `

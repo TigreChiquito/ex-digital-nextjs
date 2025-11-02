@@ -1,7 +1,3 @@
-// 📍 UBICACIÓN: src/app/categorias/[categoria]/_components/MousesHero.tsx
-
-// Hero específico para MOUSES con colores teal/cyan
-
 export default function MousesHero() {
     return (
         // Gradiente teal/cyan
