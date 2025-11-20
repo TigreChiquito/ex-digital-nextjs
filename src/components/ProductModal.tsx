@@ -121,6 +121,7 @@ export default function ProductModal({ producto, isOpen, onClose, onConfirm }: P
                             <div className={`relative h-80 bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 rounded-3xl overflow-hidden border-2 ${
                                 enOferta ? 'border-pink-700/50' : 'border-stone-800'
                             }`}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={imagenes[currentImage]}
                                     alt={producto.nombre}

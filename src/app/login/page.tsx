@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { loginUsuario } from '@/routes/auth';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -21,7 +22,7 @@ export default function LoginPage() {
         }
     }, [estaLogueado, router]);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -36,20 +37,24 @@ export default function LoginPage() {
             return;
         }
 
-        // Aquí normalmente harías una llamada a tu API
-        // Por ahora, simulamos un login exitoso
-        const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios') || '[]');
-        const usuarioEncontrado = usuariosGuardados.find(
-            (u: { email: string; password: string; nombre: string }) => u.email === email && u.password === password
-        );
+        // Llamada a la API para iniciar sesión
+        const resultado = await loginUsuario(email, password);
 
-        if (usuarioEncontrado) {
-            iniciarSesion({ email: usuarioEncontrado.email, nombre: usuarioEncontrado.nombre });
+        if (!resultado.success) {
+            setError(resultado.message || 'Email o contraseña incorrectos');
+            return;
+        }
 
-            // Mostrar notificación de éxito
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-teal-500';
-            notification.innerHTML = `
+        // Obtener el nombre del usuario desde los datos de la API
+        const nombreUsuario = resultado.data?.name || email.split('@')[0];
+        
+        // Iniciar sesión en el contexto
+        iniciarSesion({ email, nombre: nombreUsuario });
+
+        // Mostrar notificación de éxito
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-teal-500';
+        notification.innerHTML = `
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
@@ -58,15 +63,12 @@ export default function LoginPage() {
           <p class="text-sm opacity-90">Has iniciado sesión correctamente</p>
         </div>
       `;
-            document.body.appendChild(notification);
+        document.body.appendChild(notification);
 
-            setTimeout(() => {
-                notification.remove();
-                router.push('/');
-            }, 1500);
-        } else {
-            setError('Email o contraseña incorrectos');
-        }
+        setTimeout(() => {
+            notification.remove();
+            router.push('/');
+        }, 1500);
     };
 
     return (

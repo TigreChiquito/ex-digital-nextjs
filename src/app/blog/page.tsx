@@ -112,6 +112,7 @@ export default function BlogPage() {
                                 <div className={`grid grid-cols-1 lg:grid-cols-2 ${index % 2 === 0 ? '' : 'lg:grid-flow-col-dense'}`}>
                                     {/* Imagen */}
                                     <div className={`relative h-80 lg:h-auto overflow-hidden ${index % 2 === 0 ? '' : 'lg:order-2'}`}>
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={post.image}
                                             alt={post.title}
@@ -184,6 +185,7 @@ export default function BlogPage() {
 
                             {/* Imagen destacada */}
                             <div className="relative h-80 overflow-hidden">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={selectedPost.image}
                                     alt={selectedPost.title}

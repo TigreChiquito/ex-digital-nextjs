@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { registrarUsuario } from '@/routes/auth';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 
 export default function RegistroPage() {
@@ -24,7 +25,7 @@ export default function RegistroPage() {
         }
     }, [estaLogueado, router]);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -53,19 +54,13 @@ export default function RegistroPage() {
             return;
         }
 
-        // Verificar si el usuario ya existe
-        const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios') || '[]');
-        const usuarioExiste = usuariosGuardados.find((u: { email: string }) => u.email === email);
+        // Registrar usuario con la API
+        const resultado = await registrarUsuario(nombre, email, password);
 
-        if (usuarioExiste) {
-            setError('Este email ya está registrado');
+        if (!resultado.success) {
+            setError(resultado.message || 'Error al registrar usuario');
             return;
         }
-
-        // Guardar nuevo usuario
-        const nuevoUsuario = { nombre, email, password };
-        usuariosGuardados.push(nuevoUsuario);
-        localStorage.setItem('usuarios', JSON.stringify(usuariosGuardados));
 
         // Iniciar sesión automáticamente
         iniciarSesion({ nombre, email });

@@ -31,6 +31,7 @@ export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
         }`}>
             {/* Imagen con fondo más claro para contraste */}
             <div className="relative h-56 bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={producto.img}
                     alt={producto.nombre}

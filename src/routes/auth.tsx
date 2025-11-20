@@ -1,9 +1,20 @@
 'use client';
 
+interface AuthResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        token: string;
+        userId: string;
+        name?: string;
+        email?: string;
+    };
+}
+
 // registrarUsuario: realiza una llamada a la API para registrar un nuevo usuario
-export async function registrarUsuario(name: string, email: string, password: string) {
+export async function registrarUsuario(name: string, email: string, password: string): Promise<AuthResponse> {
     try {
-        const response = await fetch('http://exdigital-api-production.up.railway.app/api/auth/register', {
+        const response = await fetch('https://exdigital-api-production.up.railway.app/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -15,6 +26,12 @@ export async function registrarUsuario(name: string, email: string, password: st
             })
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error HTTP:', response.status, errorText);
+            return { success: false, message: `Error del servidor: ${response.status}` };
+        }
+
         const data = await response.json();
 
         if (data.success) {
@@ -23,6 +40,8 @@ export async function registrarUsuario(name: string, email: string, password: st
             if (typeof window !== 'undefined') {
                 localStorage.setItem('token', data.data.token);
                 localStorage.setItem('userId', data.data.userId);
+                localStorage.setItem('userName', data.data.name || name);
+                localStorage.setItem('userEmail', email);
             }
             return { success: true, data: data.data };
         } else {
@@ -36,9 +55,9 @@ export async function registrarUsuario(name: string, email: string, password: st
 }
 
 // loginUsuario: realiza una llamada a la API para iniciar sesión de un usuario existente
-export async function loginUsuario(email: string, password: string) {
+export async function loginUsuario(email: string, password: string): Promise<AuthResponse> {
     try {
-        const response = await fetch('http://exdigital-api-production.up.railway.app/api/auth/login', {
+        const response = await fetch('https://exdigital-api-production.up.railway.app/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -48,6 +67,13 @@ export async function loginUsuario(email: string, password: string) {
                 password
             })
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error HTTP:', response.status, errorText);
+            return { success: false, message: `Error del servidor: ${response.status}` };
+        }
+
         const data = await response.json();
         if (data.success) {
             console.log('Usuario logueado:', data.data);
@@ -55,6 +81,8 @@ export async function loginUsuario(email: string, password: string) {
             if (typeof window !== 'undefined') {
                 localStorage.setItem('token', data.data.token);
                 localStorage.setItem('userId', data.data.userId);
+                localStorage.setItem('userName', data.data.name || '');
+                localStorage.setItem('userEmail', email);
             }
             return { success: true, data: data.data };
         } else {
@@ -65,4 +93,20 @@ export async function loginUsuario(email: string, password: string) {
         console.error('Error de conexión:', error);
         return { success: false, message: 'Error de conexión' };
     }
+}
+
+// obtenerUsuarioActual: obtiene los datos del usuario actual desde localStorage
+export function obtenerUsuarioActual(): { name: string; email: string } | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+    
+    const userName = localStorage.getItem('userName');
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (userName && userEmail) {
+        return { name: userName, email: userEmail };
+    }
+    
+    return null;
 }

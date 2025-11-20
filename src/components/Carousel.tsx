@@ -30,7 +30,6 @@ const slides: Slide[] = [
 export default function Carousel() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [imageError, setImageError] = useState<{ [key: number]: boolean }>({});
-    const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -53,10 +52,6 @@ export default function Carousel() {
         setImageError(prev => ({ ...prev, [index]: true }));
     };
 
-    const handleImageLoad = (index: number) => {
-        setImageLoaded(prev => ({ ...prev, [index]: true }));
-    };
-
     return (
         <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden shadow-2xl z-0">
             {/* Slides */}
@@ -67,12 +62,12 @@ export default function Carousel() {
                         }`}
                 >
                     {!imageError[index] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={slide.img}
                             alt={slide.title}
                             className="w-full h-full object-cover"
                             onError={() => handleImageError(index)}
-                            onLoad={() => handleImageLoad(index)}
                         />
                     ) : (
                         // Fallback con gradiente oscuro cálido
