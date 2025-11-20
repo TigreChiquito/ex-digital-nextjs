@@ -319,7 +319,6 @@ def ejecutar_tests_desde_csv(csv_file):
                     test.limpiar_localStorage()
                 
                 # Nota: cerrar_sesion_ui() ya se llama dentro de test_registro() y test_login()
-                # No necesitamos hacerlo aquí
                 
                 try:
                     if tipo_test == 'registro':
