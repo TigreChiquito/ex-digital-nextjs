@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { ShoppingCart, Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig';
@@ -23,7 +23,7 @@ export default function Navbar() {
     const [showCategoriasMobile, setShowCategoriasMobile] = useState<boolean>(false); // Nuevo estado para mobile
     const categoriasTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const { obtenerCantidadTotal } = useCart();
-    const { usuario, cerrarSesion, estaLogueado } = useAuth();
+    const { usuario, cerrarSesion, estaLogueado, esAdmin } = useAuth();
 
     const cantidadProductos = obtenerCantidadTotal();
 
@@ -211,6 +211,16 @@ export default function Navbar() {
 
                                     {showUserMenu && (
                                         <div className="absolute right-0 mt-2 w-48 bg-stone-900 rounded-2xl shadow-2xl py-2 z-[100] border-2 border-stone-700 animate-scale-in">
+                                            {esAdmin() && (
+                                                <Link
+                                                    href="/admin"
+                                                    onClick={() => setShowUserMenu(false)}
+                                                    className="w-full px-4 py-2 text-left text-teal-400 hover:bg-stone-800 flex items-center space-x-2 transition-colors rounded-xl mx-1"
+                                                >
+                                                    <Shield className="w-4 h-4" />
+                                                    <span className="font-medium">Panel Admin</span>
+                                                </Link>
+                                            )}
                                             <button
                                                 onClick={handleCerrarSesion}
                                                 className="w-full px-4 py-2 text-left text-red-400 hover:bg-stone-800 flex items-center space-x-2 transition-colors rounded-xl mx-1"
@@ -344,6 +354,16 @@ export default function Navbar() {
                                     <div className="py-3 px-4 text-stone-200 font-bold bg-stone-800 rounded-xl backdrop-blur-sm border border-stone-700">
                                         {usuario?.nombre || usuario?.email}
                                     </div>
+                                    {esAdmin() && (
+                                        <Link
+                                            href="/admin"
+                                            className="flex items-center space-x-2 py-3 px-4 text-teal-400 hover:bg-stone-800 rounded-xl transition-colors font-semibold"
+                                            onClick={() => setIsOpen(false)}
+                                        >
+                                            <Shield className="w-5 h-5" />
+                                            <span>Panel de Administrador</span>
+                                        </Link>
+                                    )}
                                     <button
                                         onClick={() => {
                                             handleCerrarSesion();

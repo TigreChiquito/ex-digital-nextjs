@@ -63,7 +63,8 @@ export default function RegistroPage() {
         }
 
         // Iniciar sesión automáticamente
-        iniciarSesion({ nombre, email });
+        const rolUsuario = resultado.data?.role || 'USER';
+        iniciarSesion({ nombre, email, rol: rolUsuario });
 
         // Mostrar notificación de éxito
         const notification = document.createElement('div');

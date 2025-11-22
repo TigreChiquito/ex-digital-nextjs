@@ -4,7 +4,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { loginUsuario } from '@/routes/auth';
+import { loginUsuario, obtenerPerfilUsuario } from '@/routes/auth';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -45,11 +45,22 @@ export default function LoginPage() {
             return;
         }
 
-        // Obtener el nombre del usuario desde los datos de la API
-        const nombreUsuario = resultado.data?.name || email.split('@')[0];
+        // Obtener el perfil completo del usuario para obtener el rol
+        const perfil = await obtenerPerfilUsuario();
+        
+        // Obtener el nombre y rol del usuario
+        const nombreUsuario = perfil.success && perfil.data?.name 
+            ? perfil.data.name 
+            : resultado.data?.name || email.split('@')[0];
+        
+        const rolUsuario = perfil.success && perfil.data?.role 
+            ? perfil.data.role 
+            : resultado.data?.role || 'USER';
+        
+        console.log('👤 Iniciando sesión con:', { nombreUsuario, rolUsuario, email });
         
         // Iniciar sesión en el contexto
-        iniciarSesion({ email, nombre: nombreUsuario });
+        iniciarSesion({ email, nombre: nombreUsuario, rol: rolUsuario });
 
         // Mostrar notificación de éxito
         const notification = document.createElement('div');
