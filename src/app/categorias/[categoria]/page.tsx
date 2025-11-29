@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useMemo, use } from 'react';
+import { useState, useMemo, use, useEffect } from 'react';
 import { Search, SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import { useCart } from '@/context/CartContext';
-import { productos } from '@/data/productos';
 import { Producto } from '@/context/CartContext';
 import { getConfigBySlug } from '@/utils/categoriasConfig';
+import { obtenerProductos, ProductDto } from '@/routes/Product';
+import { obtenerTodasCategorias, CategoryDto } from '@/routes/category';
 
 // Importar los 3 componentes Hero
 import AuricularesHero from './_components/AuricularesHero';
@@ -45,17 +46,53 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { agregarAlCarrito } = useCart();
 
+    // Estados para datos de API
+    const [productos, setProductos] = useState<ProductDto[]>([]);
+    const [cargando, setCargando] = useState(true);
+    const [categoriaActual, setCategoriaActual] = useState<CategoryDto | null>(null);
+
+    // Cargar datos de API
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                const [respProductos, respCategorias] = await Promise.all([
+                    obtenerProductos(),
+                    obtenerTodasCategorias()
+                ]);
+
+                if (respProductos.success && respProductos.data) {
+                    setProductos(respProductos.data);
+                }
+
+                if (respCategorias.success && respCategorias.data) {
+                    // Buscar categoría por nombre (del config)
+                    const cat = respCategorias.data.find(c => 
+                        c.name.toLowerCase() === config.nombre.toLowerCase()
+                    );
+                    setCategoriaActual(cat || null);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+            } finally {
+                setCargando(false);
+            }
+        };
+        cargarDatos();
+    }, [config.nombre]);
+
     // 6. FILTRAR productos solo de esta categoría
-    // Ejemplo: Si estamos en /categorias/teclados, solo muestra productos con categoria: "Teclados"
-    const productosCategoria = productos.filter(p => p.categoria === config.nombre);
+    const productosCategoria = useMemo(() => {
+        if (!categoriaActual) return [];
+        return productos.filter(p => p.categoryId === categoriaActual.categoryId);
+    }, [productos, categoriaActual]);
 
     // 7. Calcular precios mín/máx de los productos de esta categoría
     const precioMinProducto = useMemo(() => 
-        Math.min(...productosCategoria.map(p => p.precio)), 
+        productosCategoria.length > 0 ? Math.min(...productosCategoria.map(p => p.value || 0)) : 0, 
         [productosCategoria]
     );
     const precioMaxProducto = useMemo(() => 
-        Math.max(...productosCategoria.map(p => p.precio)), 
+        productosCategoria.length > 0 ? Math.max(...productosCategoria.map(p => p.value || 0)) : 100000, 
         [productosCategoria]
     );
 
@@ -67,7 +104,26 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
     const [showFilters, setShowFilters] = useState(false);
 
     // 9. Handlers (funciones que manejan eventos)
-    const handleAgregarClick = (producto: Producto) => {
+    const handleAgregarClick = (productoDto: ProductDto) => {
+        // Convertir ProductDto a Producto para el modal
+        const producto: Producto = {
+            id: productoDto.productId,
+            nombre: productoDto.name,
+            precio: productoDto.value || 0,
+            categoria: categoriaActual?.name || config.nombre,
+            img: '/img/productos/default.avif',
+            img2: '/img/productos/default.avif',
+            img3: '/img/productos/default.avif',
+            descripcion: productoDto.description,
+            oferta: productoDto.discountId ? {
+                activa: true,
+                precioOriginal: productoDto.value || 0,
+                descuento: productoDto.discountPercentage || 0,
+                fechaInicio: '',
+                fechaFin: '',
+                etiqueta: 'Oferta'
+            } : undefined
+        };
         setSelectedProduct(producto);
         setIsModalOpen(true);
     };
@@ -93,17 +149,17 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
 
     // 10. Lógica de filtrado
     const productosFiltrados = productosCategoria.filter(producto => {
-        const cumpleNombre = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-        const cumplePrecio = producto.precio >= precioMin && producto.precio <= precioMax;
+        const cumpleNombre = producto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            producto.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const cumplePrecio = (producto.value || 0) >= precioMin && (producto.value || 0) <= precioMax;
         return cumpleNombre && cumplePrecio;
     });
 
     // 11. Lógica de ordenamiento
     const productosOrdenados = [...productosFiltrados].sort((a, b) => {
-        if (ordenamiento === 'menor') return a.precio - b.precio;
-        if (ordenamiento === 'mayor') return b.precio - a.precio;
-        if (ordenamiento === 'nombre') return a.nombre.localeCompare(b.nombre);
+        if (ordenamiento === 'menor') return (a.value || 0) - (b.value || 0);
+        if (ordenamiento === 'mayor') return (b.value || 0) - (a.value || 0);
+        if (ordenamiento === 'nombre') return a.name.localeCompare(b.name);
         return 0;
     });
 
@@ -121,6 +177,17 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
         ordenamiento;
 
     // 13. RENDERIZADO (lo que se muestra en pantalla)
+    if (cargando) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                    <p className="text-white text-lg">Cargando productos...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen">
             {/* Breadcrumb: Volver a productos */}
@@ -251,13 +318,34 @@ export default function CategoriaPage({ params }: { params: Promise<{ categoria:
                 {/* Grid de productos */}
                 {productosOrdenados.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {productosOrdenados.map((producto, index) => (
-                            <ProductCard
-                                key={index}
-                                producto={producto}
-                                onAgregar={handleAgregarClick}
-                            />
-                        ))}
+                        {productosOrdenados.map((productoDto) => {
+                            // Convertir ProductDto a Producto para ProductCard
+                            const producto: Producto = {
+                                id: productoDto.productId,
+                                nombre: productoDto.name,
+                                precio: productoDto.value || 0,
+                                categoria: categoriaActual?.name || config.nombre,
+                                img: '/img/productos/default.avif',
+                                img2: '/img/productos/default.avif',
+                                img3: '/img/productos/default.avif',
+                                descripcion: productoDto.description,
+                                oferta: productoDto.discountId ? {
+                                    activa: true,
+                                    precioOriginal: productoDto.value || 0,
+                                    descuento: productoDto.discountPercentage || 0,
+                                    fechaInicio: '',
+                                    fechaFin: '',
+                                    etiqueta: 'Oferta'
+                                } : undefined
+                            };
+                            return (
+                                <ProductCard
+                                    key={productoDto.productId}
+                                    producto={producto}
+                                    onAgregar={() => handleAgregarClick(productoDto)}
+                                />
+                            );
+                        })}
                     </div>
                 ) : (
                     // Mensaje cuando no hay resultados

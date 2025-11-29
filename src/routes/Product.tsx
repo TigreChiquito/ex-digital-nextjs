@@ -6,7 +6,7 @@ interface ApiResponse<T> {
     data?: T;
 }
 
-interface CreateProductRequest {
+export interface CreateProductRequest {
     name: string;
     value: number;
     categoryId: number;
@@ -15,14 +15,15 @@ interface CreateProductRequest {
     discountId?: number | null;
 }
 
-interface UpdateProductRequest extends CreateProductRequest {
+export interface UpdateProductRequest extends CreateProductRequest {
     productId: number;
 }
 
-interface ProductDto {
+export interface ProductDto {
     productId: number;
     name: string;
-    value: number;
+    value?: number; // Puede venir como value
+    price?: number; // O como price
     categoryId: number;
     categoryName?: string;
     description: string;
@@ -34,12 +35,18 @@ interface ProductDto {
 // obtenerProductos: realiza una llamada a la API para obtener la lista de productos
 export async function obtenerProductos(): Promise<ApiResponse<ProductDto[]>> {
     try {
+        console.log('Iniciando petición a la API...');
         const response = await fetch('https://exdigital-api-production.up.railway.app/api/products', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            mode: 'cors',
+            cache: 'no-cache'
         });
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -48,11 +55,31 @@ export async function obtenerProductos(): Promise<ApiResponse<ProductDto[]>> {
         }
 
         const data = await response.json();
-        console.log('Productos obtenidos:', data);
-        return { success: true, data: data.data || data };
+        console.log('Datos recibidos:', data);
+        
+        // Si hay error en los datos, mostrar mensaje más claro
+        if (!data.success && data.message) {
+            console.error('Error de la API:', data.message);
+            // Extraer mensaje más legible del error SQL
+            let errorMsg = data.message;
+            if (errorMsg.includes('column') && errorMsg.includes('does not exist')) {
+                errorMsg = 'Error en el backend: La base de datos necesita actualización. Contacte al administrador.';
+            }
+            return { success: false, message: errorMsg, data: [] };
+        }
+        
+        // Normalizar los datos: asegurar que cada producto tenga 'value'
+        const productos = (data.data || data || []).map((p: ProductDto) => ({
+            ...p,
+            value: p.value || p.price || 0
+        }));
+        
+        console.log('Productos normalizados:', productos);
+        return { success: true, data: productos };
     } catch (error) {
         console.error('Error en obtenerProductos:', error);
-        return { success: false, message: 'Error de conexión' };
+        console.error('Error completo:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        return { success: false, message: 'Error de conexión con la API', data: [] };
     }
 }
 
@@ -207,7 +234,7 @@ export async function ajustarStock(productId: number, cantidad: number): Promise
         // Actualizar el producto con el nuevo stock
         const productoActualizado: CreateProductRequest = {
             name: productoActual.data.name,
-            value: productoActual.data.value,
+            value: productoActual.data.value || 0,
             categoryId: productoActual.data.categoryId,
             description: productoActual.data.description,
             stock: nuevoStock,
@@ -220,5 +247,3 @@ export async function ajustarStock(productId: number, cantidad: number): Promise
         return { success: false, message: 'Error al ajustar stock' };
     }
 }
-
-export type { ApiResponse, CreateProductRequest, UpdateProductRequest, ProductDto };

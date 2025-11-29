@@ -1,31 +1,96 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, SlidersHorizontal, X, Tag } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import { useCart } from '@/context/CartContext';
-import { productos, categorias } from '@/data/productos';
 import { Producto } from '@/context/CartContext';
+import { obtenerProductos, ProductDto } from '@/routes/Product';
+import { obtenerTodasCategorias, CategoryDto } from '@/routes/category';
 
 export default function ProductosPage() {
     const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { agregarAlCarrito } = useCart();
 
+    // Estados para datos de API
+    const [productos, setProductos] = useState<ProductDto[]>([]);
+    const [categorias, setCategorias] = useState<CategoryDto[]>([]);
+    const [cargando, setCargando] = useState(true);
+
+    // Cargar datos de API
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                const [respProductos, respCategorias] = await Promise.all([
+                    obtenerProductos(),
+                    obtenerTodasCategorias()
+                ]);
+
+                if (respProductos.success && respProductos.data) {
+                    setProductos(respProductos.data);
+                }
+
+                if (respCategorias.success && respCategorias.data) {
+                    setCategorias(respCategorias.data);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+            } finally {
+                setCargando(false);
+            }
+        };
+        cargarDatos();
+    }, []);
+
     // Calcular precio mínimo y máximo de todos los productos
-    const precioMinProducto = useMemo(() => Math.min(...productos.map(p => p.precio)), []);
-    const precioMaxProducto = useMemo(() => Math.max(...productos.map(p => p.precio)), []);
+    const precioMinProducto = useMemo(() => 
+        productos.length > 0 ? Math.min(...productos.map(p => p.value || 0)) : 0, 
+        [productos]
+    );
+    const precioMaxProducto = useMemo(() => 
+        productos.length > 0 ? Math.max(...productos.map(p => p.value || 0)) : 100000, 
+        [productos]
+    );
 
     // Estados para filtros y búsqueda
     const [searchTerm, setSearchTerm] = useState('');
-    const [precioMin, setPrecioMin] = useState(precioMinProducto);
-    const [precioMax, setPrecioMax] = useState(precioMaxProducto);
-    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('');
+    const [precioMin, setPrecioMin] = useState(0);
+    const [precioMax, setPrecioMax] = useState(100000);
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<number | null>(null);
     const [ordenamiento, setOrdenamiento] = useState<'menor' | 'mayor' | 'nombre' | ''>('');
     const [showFilters, setShowFilters] = useState(false);
 
-    const handleAgregarClick = (producto: Producto) => {
+    // Actualizar rangos de precio cuando carguen productos
+    useEffect(() => {
+        if (productos.length > 0) {
+            setPrecioMin(precioMinProducto);
+            setPrecioMax(precioMaxProducto);
+        }
+    }, [precioMinProducto, precioMaxProducto, productos.length]);
+
+    const handleAgregarClick = (productoDto: ProductDto) => {
+        const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+        // Convertir ProductDto a Producto
+        const producto: Producto = {
+            id: productoDto.productId,
+            nombre: productoDto.name,
+            precio: productoDto.value || 0,
+            categoria: categoria?.name || 'Sin categoría',
+            img: '/img/productos/default.avif',
+            img2: '/img/productos/default.avif',
+            img3: '/img/productos/default.avif',
+            descripcion: productoDto.description,
+            oferta: productoDto.discountId ? {
+                activa: true,
+                precioOriginal: productoDto.value || 0,
+                descuento: productoDto.discountPercentage || 0,
+                fechaInicio: '',
+                fechaFin: '',
+                etiqueta: 'Oferta'
+            } : undefined
+        };
         setSelectedProduct(producto);
         setIsModalOpen(true);
     };
@@ -51,21 +116,21 @@ export default function ProductosPage() {
 
     // Filtrar productos
     const productosFiltrados = productos.filter(producto => {
-        const cumpleNombre = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+        const cumpleNombre = producto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            producto.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const cumplePrecio = producto.precio >= precioMin && producto.precio <= precioMax;
+        const cumplePrecio = (producto.value || 0) >= precioMin && (producto.value || 0) <= precioMax;
 
-        const cumpleCategoria = categoriaSeleccionada === '' || producto.categoria === categoriaSeleccionada;
+        const cumpleCategoria = categoriaSeleccionada === null || producto.categoryId === categoriaSeleccionada;
 
         return cumpleNombre && cumplePrecio && cumpleCategoria;
     });
 
     // Ordenar productos
     const productosOrdenados = [...productosFiltrados].sort((a, b) => {
-        if (ordenamiento === 'menor') return a.precio - b.precio;
-        if (ordenamiento === 'mayor') return b.precio - a.precio;
-        if (ordenamiento === 'nombre') return a.nombre.localeCompare(b.nombre);
+        if (ordenamiento === 'menor') return (a.value || 0) - (b.value || 0);
+        if (ordenamiento === 'mayor') return (b.value || 0) - (a.value || 0);
+        if (ordenamiento === 'nombre') return a.name.localeCompare(b.name);
         return 0;
     });
 
@@ -73,15 +138,26 @@ export default function ProductosPage() {
         setSearchTerm('');
         setPrecioMin(precioMinProducto);
         setPrecioMax(precioMaxProducto);
-        setCategoriaSeleccionada('');
+        setCategoriaSeleccionada(null);
         setOrdenamiento('');
     };
 
     const hayFiltrosActivos = searchTerm ||
         precioMin !== precioMinProducto ||
         precioMax !== precioMaxProducto ||
-        categoriaSeleccionada ||
+        categoriaSeleccionada !== null ||
         ordenamiento;
+
+    if (cargando) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                    <p className="text-white text-lg">Cargando productos...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen py-12 px-4">
@@ -134,8 +210,8 @@ export default function ProductosPage() {
                                 </label>
                                 <div className="flex flex-wrap gap-3">
                                     <button
-                                        onClick={() => setCategoriaSeleccionada('')}
-                                        className={`px-5 py-2 rounded-xl font-bold transition-all ${categoriaSeleccionada === ''
+                                        onClick={() => setCategoriaSeleccionada(null)}
+                                        className={`px-5 py-2 rounded-xl font-bold transition-all ${categoriaSeleccionada === null
                                                 ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                                                 : 'bg-stone-800 text-stone-400 hover:bg-stone-700 border-2 border-stone-700'
                                             }`}
@@ -144,14 +220,14 @@ export default function ProductosPage() {
                                     </button>
                                     {categorias.map(categoria => (
                                         <button
-                                            key={categoria}
-                                            onClick={() => setCategoriaSeleccionada(categoria)}
-                                            className={`px-5 py-2 rounded-xl font-bold transition-all ${categoriaSeleccionada === categoria
+                                            key={categoria.categoryId}
+                                            onClick={() => setCategoriaSeleccionada(categoria.categoryId)}
+                                            className={`px-5 py-2 rounded-xl font-bold transition-all ${categoriaSeleccionada === categoria.categoryId
                                                     ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg'
                                                     : 'bg-stone-800 text-stone-400 hover:bg-stone-700 border-2 border-stone-700'
                                                 }`}
                                         >
-                                            {categoria}
+                                            {categoria.name}
                                         </button>
                                     ))}
                                 </div>
@@ -262,13 +338,35 @@ export default function ProductosPage() {
                 {/* Grid de Productos */}
                 {productosOrdenados.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {productosOrdenados.map((producto, index) => (
-                            <ProductCard
-                                key={index}
-                                producto={producto}
-                                onAgregar={handleAgregarClick}
-                            />
-                        ))}
+                        {productosOrdenados.map((productoDto) => {
+                            const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+                            // Convertir ProductDto a Producto para ProductCard
+                            const producto: Producto = {
+                                id: productoDto.productId,
+                                nombre: productoDto.name,
+                                precio: productoDto.value || 0,
+                                categoria: categoria?.name || 'Sin categoría',
+                                img: '/img/productos/default.avif',
+                                img2: '/img/productos/default.avif',
+                                img3: '/img/productos/default.avif',
+                                descripcion: productoDto.description,
+                                oferta: productoDto.discountId ? {
+                                    activa: true,
+                                    precioOriginal: productoDto.value || 0,
+                                    descuento: productoDto.discountPercentage || 0,
+                                    fechaInicio: '',
+                                    fechaFin: '',
+                                    etiqueta: 'Oferta'
+                                } : undefined
+                            };
+                            return (
+                                <ProductCard
+                                    key={productoDto.productId}
+                                    producto={producto}
+                                    onAgregar={() => handleAgregarClick(productoDto)}
+                                />
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-20 animate-fade-in">

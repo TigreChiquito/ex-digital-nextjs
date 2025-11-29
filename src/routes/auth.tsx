@@ -118,7 +118,7 @@ export function obtenerUsuarioActual(): { name: string; email: string } | null {
 }
 
 // obtenerPerfilUsuario: obtiene el perfil completo del usuario desde la API usando el token
-export async function obtenerPerfilUsuario(): Promise<{ success: boolean; data?: any; message?: string }> {
+export async function obtenerPerfilUsuario(): Promise<{ success: boolean; data?: unknown; message?: string }> {
     try {
         const token = localStorage.getItem('token');
         if (!token) {

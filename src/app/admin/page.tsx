@@ -3,8 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Producto } from '@/context/CartContext';
-import { productos as productosIniciales } from '@/data/productos';
+import { 
+    obtenerProductos,
+    crearProducto,
+    actualizarProducto,
+    eliminarProducto as eliminarProductoAPI,
+    ajustarStock as ajustarStockAPI,
+    ProductDto,
+    CreateProductRequest
+} from '@/routes/Product';
+import { obtenerTodasCategorias, CategoryDto } from '@/routes/category';
 import { 
     Package, 
     Plus, 
@@ -21,40 +29,43 @@ import {
     AlertCircle
 } from 'lucide-react';
 
-interface ProductoExtendido extends Producto {
-    stock?: number;
+interface FormDataProduct {
+    productId?: number;
+    name: string;
+    value: number;
+    categoryId: number;
+    description: string;
+    stock: number;
+    discountId?: number | null;
+    img?: string;
+    img2?: string;
+    img3?: string;
 }
 
 export default function AdminPage() {
     const router = useRouter();
     const { estaLogueado, esAdmin, isLoaded } = useAuth();
     const [cargando, setCargando] = useState(true);
-    const [productos, setProductos] = useState<ProductoExtendido[]>([]);
+    const [productos, setProductos] = useState<ProductDto[]>([]);
+    const [categorias, setCategorias] = useState<CategoryDto[]>([]);
     const [busqueda, setBusqueda] = useState('');
-    const [categoriaFiltro, setCategoriaFiltro] = useState('Todas');
+    const [categoriaFiltro, setCategoriaFiltro] = useState<number | null>(null);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [modoEdicion, setModoEdicion] = useState(false);
-    const [productoActual, setProductoActual] = useState<ProductoExtendido | null>(null);
+    const [productoActual, setProductoActual] = useState<ProductDto | null>(null);
     const [notification, setNotification] = useState<{ tipo: 'success' | 'error', mensaje: string } | null>(null);
 
     // Formulario de producto
-    const [formData, setFormData] = useState<ProductoExtendido>({
-        nombre: '',
-        precio: 0,
-        categoria: 'Teclados',
+    const [formData, setFormData] = useState<FormDataProduct>({
+        name: '',
+        value: 0,
+        categoryId: 1,
+        description: '',
+        stock: 0,
+        discountId: null,
         img: '',
         img2: '',
-        img3: '',
-        descripcion: '',
-        stock: 0,
-        oferta: {
-            activa: false,
-            precioOriginal: 0,
-            descuento: 0,
-            fechaInicio: '',
-            fechaFin: '',
-            etiqueta: ''
-        }
+        img3: ''
     });
 
     // Verificar autenticación y cargar productos
@@ -78,28 +89,33 @@ export default function AdminPage() {
             return;
         }
 
-        console.log('✅ Usuario admin verificado, cargando productos');
-        setCargando(false);
-
-        // Cargar productos desde localStorage o usar datos iniciales
-        const productosGuardados = localStorage.getItem('productosAdmin');
-        if (productosGuardados) {
-            setProductos(JSON.parse(productosGuardados));
-        } else {
-            // Agregar stock a productos iniciales
-            const productosConStock = productosIniciales.map(p => ({
-                ...p,
-                stock: Math.floor(Math.random() * 50) + 10 // Stock aleatorio entre 10-60
-            }));
-            setProductos(productosConStock);
-            localStorage.setItem('productosAdmin', JSON.stringify(productosConStock));
-        }
+        console.log('✅ Usuario admin verificado, cargando datos');
+        cargarDatos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoaded, estaLogueado, esAdmin, router]);
 
-    // Guardar productos en localStorage
-    const guardarProductos = (nuevosProductos: ProductoExtendido[]) => {
-        setProductos(nuevosProductos);
-        localStorage.setItem('productosAdmin', JSON.stringify(nuevosProductos));
+    // Cargar productos y categorías desde la API
+    const cargarDatos = async () => {
+        try {
+            // Cargar productos
+            const respProductos = await obtenerProductos();
+            if (respProductos.success && respProductos.data) {
+                setProductos(respProductos.data);
+            } else {
+                mostrarNotificacion('error', 'Error al cargar productos');
+            }
+
+            // Cargar categorías
+            const respCategorias = await obtenerTodasCategorias();
+            if (respCategorias.success && respCategorias.data) {
+                setCategorias(respCategorias.data);
+            }
+        } catch (error) {
+            console.error('Error al cargar datos:', error);
+            mostrarNotificacion('error', 'Error de conexión');
+        } finally {
+            setCargando(false);
+        }
     };
 
     // Mostrar notificación
@@ -112,31 +128,35 @@ export default function AdminPage() {
     const abrirModalAgregar = () => {
         setModoEdicion(false);
         setFormData({
-            nombre: '',
-            precio: 0,
-            categoria: 'Teclados',
+            name: '',
+            value: 0,
+            categoryId: categorias[0]?.categoryId || 1,
+            description: '',
+            stock: 0,
+            discountId: null,
             img: '',
             img2: '',
-            img3: '',
-            descripcion: '',
-            stock: 0,
-            oferta: {
-                activa: false,
-                precioOriginal: 0,
-                descuento: 0,
-                fechaInicio: '',
-                fechaFin: '',
-                etiqueta: ''
-            }
+            img3: ''
         });
         setModalAbierto(true);
     };
 
     // Abrir modal para editar producto
-    const abrirModalEditar = (producto: ProductoExtendido) => {
+    const abrirModalEditar = (producto: ProductDto) => {
         setModoEdicion(true);
         setProductoActual(producto);
-        setFormData({ ...producto });
+        setFormData({
+            productId: producto.productId,
+            name: producto.name,
+            value: producto.value || 0,
+            categoryId: producto.categoryId,
+            description: producto.description,
+            stock: producto.stock,
+            discountId: producto.discountId || null,
+            img: '',
+            img2: '',
+            img3: ''
+        });
         setModalAbierto(true);
     };
 
@@ -147,70 +167,101 @@ export default function AdminPage() {
     };
 
     // Guardar producto (agregar o editar)
-    const guardarProducto = () => {
-        if (!formData.nombre || !formData.precio || !formData.img) {
+    const guardarProducto = async () => {
+        if (!formData.name || !formData.value || formData.categoryId === 0) {
             mostrarNotificacion('error', 'Por favor completa todos los campos obligatorios');
             return;
         }
 
-        if (modoEdicion && productoActual) {
-            // Editar producto existente
-            const nuevosProductos = productos.map(p =>
-                p.nombre === productoActual.nombre ? formData : p
-            );
-            guardarProductos(nuevosProductos);
-            mostrarNotificacion('success', 'Producto actualizado correctamente');
-        } else {
-            // Agregar nuevo producto
-            const productoExiste = productos.find(p => p.nombre === formData.nombre);
-            if (productoExiste) {
-                mostrarNotificacion('error', 'Ya existe un producto con ese nombre');
-                return;
+        try {
+            if (modoEdicion && productoActual) {
+                // Editar producto existente
+                const productoRequest: CreateProductRequest = {
+                    name: formData.name,
+                    value: formData.value,
+                    categoryId: formData.categoryId,
+                    description: formData.description,
+                    stock: formData.stock,
+                    discountId: formData.discountId || undefined
+                };
+                const resp = await actualizarProducto(productoActual.productId, productoRequest);
+                if (resp.success) {
+                    mostrarNotificacion('success', 'Producto actualizado correctamente');
+                    cargarDatos();
+                    cerrarModal();
+                } else {
+                    mostrarNotificacion('error', resp.message || 'Error al actualizar producto');
+                }
+            } else {
+                // Agregar nuevo producto
+                const productoRequest: CreateProductRequest = {
+                    name: formData.name,
+                    value: formData.value,
+                    categoryId: formData.categoryId,
+                    description: formData.description,
+                    stock: formData.stock,
+                    discountId: formData.discountId || undefined
+                };
+                const resp = await crearProducto(productoRequest);
+                if (resp.success) {
+                    mostrarNotificacion('success', 'Producto agregado correctamente');
+                    cargarDatos();
+                    cerrarModal();
+                } else {
+                    mostrarNotificacion('error', resp.message || 'Error al crear producto');
+                }
             }
-            guardarProductos([...productos, formData]);
-            mostrarNotificacion('success', 'Producto agregado correctamente');
+        } catch (error) {
+            console.error('Error al guardar producto:', error);
+            mostrarNotificacion('error', 'Error de conexión');
         }
-
-        cerrarModal();
     };
 
     // Eliminar producto
-    const eliminarProducto = (nombre: string) => {
-        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-            const nuevosProductos = productos.filter(p => p.nombre !== nombre);
-            guardarProductos(nuevosProductos);
-            mostrarNotificacion('success', 'Producto eliminado correctamente');
+    const eliminarProducto = async (productId: number, nombre: string) => {
+        if (confirm(`¿Estás seguro de que deseas eliminar "${nombre}"?`)) {
+            try {
+                const resp = await eliminarProductoAPI(productId);
+                if (resp.success) {
+                    mostrarNotificacion('success', 'Producto eliminado correctamente');
+                    cargarDatos();
+                } else {
+                    mostrarNotificacion('error', resp.message || 'Error al eliminar producto');
+                }
+            } catch (error) {
+                console.error('Error al eliminar producto:', error);
+                mostrarNotificacion('error', 'Error de conexión');
+            }
         }
     };
 
     // Ajustar stock
-    const ajustarStock = (nombre: string, cambio: number) => {
-        const nuevosProductos = productos.map(p => {
-            if (p.nombre === nombre) {
-                const nuevoStock = (p.stock || 0) + cambio;
-                return { ...p, stock: Math.max(0, nuevoStock) };
+    const ajustarStock = async (productId: number, cambio: number) => {
+        try {
+            const resp = await ajustarStockAPI(productId, cambio);
+            if (resp.success) {
+                mostrarNotificacion('success', `Stock ${cambio > 0 ? 'aumentado' : 'disminuido'} correctamente`);
+                cargarDatos();
+            } else {
+                mostrarNotificacion('error', resp.message || 'Error al ajustar stock');
             }
-            return p;
-        });
-        guardarProductos(nuevosProductos);
-        mostrarNotificacion('success', `Stock ${cambio > 0 ? 'aumentado' : 'disminuido'} correctamente`);
+        } catch (error) {
+            console.error('Error al ajustar stock:', error);
+            mostrarNotificacion('error', 'Error de conexión');
+        }
     };
 
     // Filtrar productos
     const productosFiltrados = productos.filter(p => {
-        const coincideBusqueda = p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-            p.categoria.toLowerCase().includes(busqueda.toLowerCase());
-        const coincideCategoria = categoriaFiltro === 'Todas' || p.categoria === categoriaFiltro;
+        const coincideBusqueda = p.name.toLowerCase().includes(busqueda.toLowerCase());
+        const coincideCategoria = categoriaFiltro === null || p.categoryId === categoriaFiltro;
         return coincideBusqueda && coincideCategoria;
     });
 
-    // Obtener categorías únicas
-    const categorias = ['Todas', ...Array.from(new Set(productos.map(p => p.categoria)))];
-
     // Estadísticas
     const totalProductos = productos.length;
-    const totalStock = productos.reduce((sum, p) => sum + (p.stock || 0), 0);
-    const productosEnOferta = productos.filter(p => p.oferta?.activa).length;
+    const totalStock = productos.reduce((sum, p) => sum + p.stock, 0);
+    const productosEnOferta = productos.filter(p => p.discountId !== null).length;
 
     // Mostrar pantalla de carga mientras verifica permisos
     if (cargando) {
@@ -300,12 +351,13 @@ export default function AdminPage() {
 
                         {/* Filtro de categoría */}
                         <select
-                            value={categoriaFiltro}
-                            onChange={(e) => setCategoriaFiltro(e.target.value)}
+                            value={categoriaFiltro === null ? '' : categoriaFiltro}
+                            onChange={(e) => setCategoriaFiltro(e.target.value === '' ? null : Number(e.target.value))}
                             className="bg-stone-900/80 border-2 border-stone-700 rounded-2xl px-6 py-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
                         >
+                            <option key="all" value="">Todas las categorías</option>
                             {categorias.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
+                                <option key={cat.categoryId} value={cat.categoryId}>{cat.name}</option>
                             ))}
                         </select>
 
@@ -335,54 +387,53 @@ export default function AdminPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {productosFiltrados.map((producto, index) => (
+                                {productosFiltrados.map((producto) => {
+                                    const categoria = categorias.find(c => c.categoryId === producto.categoryId);
+                                    return (
                                     <tr
-                                        key={producto.nombre}
+                                        key={producto.productId}
                                         className="border-b border-stone-700 hover:bg-stone-900/50 transition-colors"
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-3">
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img
-                                                    src={producto.img}
-                                                    alt={producto.nombre}
-                                                    className="w-16 h-16 object-cover rounded-xl bg-stone-700"
-                                                />
+                                                <div className="w-16 h-16 bg-stone-700 rounded-xl flex items-center justify-center">
+                                                    <Package className="w-8 h-8 text-stone-500" />
+                                                </div>
                                                 <div>
-                                                    <p className="text-white font-semibold">{producto.nombre}</p>
-                                                    <p className="text-stone-400 text-sm">{producto.descripcion.substring(0, 40)}...</p>
+                                                    <p className="text-white font-semibold">{producto.name}</p>
+                                                    <p className="text-stone-400 text-sm">{producto.description.substring(0, 40)}...</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="bg-orange-600/20 text-orange-400 px-3 py-1 rounded-full text-sm font-medium border border-orange-600/30">
-                                                {producto.categoria}
+                                                {categoria?.name || 'Sin categoría'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-1">
                                                 <DollarSign className="w-4 h-4 text-teal-400" />
                                                 <span className="text-white font-semibold">
-                                                    {producto.precio.toLocaleString('es-CL')}
+                                                    {(producto.value || 0).toLocaleString('es-CL')}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-2">
                                                 <button
-                                                    onClick={() => ajustarStock(producto.nombre, -1)}
+                                                    onClick={() => ajustarStock(producto.productId, -1)}
                                                     className="bg-red-600 hover:bg-red-500 text-white p-1.5 rounded-lg transition-colors"
-                                                    disabled={(producto.stock || 0) === 0}
+                                                    disabled={producto.stock === 0}
                                                 >
                                                     <TrendingDown className="w-4 h-4" />
                                                 </button>
                                                 <span className={`text-white font-semibold min-w-[3rem] text-center ${
-                                                    (producto.stock || 0) < 10 ? 'text-red-400' : ''
+                                                    producto.stock < 10 ? 'text-red-400' : ''
                                                 }`}>
-                                                    {producto.stock || 0}
+                                                    {producto.stock}
                                                 </span>
                                                 <button
-                                                    onClick={() => ajustarStock(producto.nombre, 1)}
+                                                    onClick={() => ajustarStock(producto.productId, 1)}
                                                     className="bg-green-600 hover:bg-green-500 text-white p-1.5 rounded-lg transition-colors"
                                                 >
                                                     <TrendingUp className="w-4 h-4" />
@@ -390,10 +441,10 @@ export default function AdminPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {producto.oferta?.activa ? (
+                                            {producto.discountId ? (
                                                 <span className="bg-pink-600/20 text-pink-400 px-3 py-1 rounded-full text-sm font-medium border border-pink-600/30 flex items-center space-x-1 w-fit">
                                                     <Tag className="w-3 h-3" />
-                                                    <span>-{producto.oferta.descuento}%</span>
+                                                    <span>En oferta</span>
                                                 </span>
                                             ) : (
                                                 <span className="text-stone-500 text-sm">Sin oferta</span>
@@ -409,7 +460,7 @@ export default function AdminPage() {
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => eliminarProducto(producto.nombre)}
+                                                    onClick={() => eliminarProducto(producto.productId, producto.name)}
                                                     className="bg-red-600 hover:bg-red-500 text-white p-2 rounded-xl transition-colors"
                                                     title="Eliminar"
                                                 >
@@ -418,7 +469,8 @@ export default function AdminPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -458,11 +510,10 @@ export default function AdminPage() {
                                     <label className="block text-stone-300 font-semibold mb-2">Nombre *</label>
                                     <input
                                         type="text"
-                                        value={formData.nombre}
-                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500"
-                                        placeholder="Ej: G915 TKL"
-                                        disabled={modoEdicion}
+                                        placeholder="Ej: Teclado Mecánico RGB"
                                     />
                                 </div>
 
@@ -471,8 +522,8 @@ export default function AdminPage() {
                                     <label className="block text-stone-300 font-semibold mb-2">Precio *</label>
                                     <input
                                         type="number"
-                                        value={formData.precio}
-                                        onChange={(e) => setFormData({ ...formData, precio: Number(e.target.value) })}
+                                        value={formData.value}
+                                        onChange={(e) => setFormData({ ...formData, value: Number(e.target.value) })}
                                         className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500"
                                         placeholder="15000"
                                     />
@@ -482,13 +533,13 @@ export default function AdminPage() {
                                 <div>
                                     <label className="block text-stone-300 font-semibold mb-2">Categoría *</label>
                                     <select
-                                        value={formData.categoria}
-                                        onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                                        value={formData.categoryId}
+                                        onChange={(e) => setFormData({ ...formData, categoryId: Number(e.target.value) })}
                                         className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500"
                                     >
-                                        <option value="Teclados">Teclados</option>
-                                        <option value="Mouses">Mouses</option>
-                                        <option value="Auriculares">Auriculares</option>
+                                        {categorias.map(cat => (
+                                            <option key={cat.categoryId} value={cat.categoryId}>{cat.name}</option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -497,14 +548,14 @@ export default function AdminPage() {
                                     <label className="block text-stone-300 font-semibold mb-2">Stock</label>
                                     <input
                                         type="number"
-                                        value={formData.stock || 0}
+                                        value={formData.stock}
                                         onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
                                         className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500"
                                         placeholder="50"
                                     />
                                 </div>
 
-                                {/* Imagen principal */}
+                                {/* Imagen principal (opcional - no usado en API) */}
                                 <div className="md:col-span-2">
                                     <label className="text-stone-300 font-semibold mb-2 flex items-center space-x-2">
                                         <ImageIcon className="w-4 h-4" />
@@ -547,114 +598,11 @@ export default function AdminPage() {
                                 <div className="md:col-span-2">
                                     <label className="block text-stone-300 font-semibold mb-2">Descripción</label>
                                     <textarea
-                                        value={formData.descripcion}
-                                        onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 min-h-[100px]"
                                         placeholder="Descripción del producto..."
                                     />
-                                </div>
-
-                                {/* Sección de oferta */}
-                                <div className="md:col-span-2 border-t-2 border-stone-700 pt-6">
-                                    <div className="flex items-center space-x-3 mb-4">
-                                        <input
-                                            type="checkbox"
-                                            id="oferta-activa"
-                                            checked={formData.oferta?.activa || false}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                oferta: {
-                                                    ...formData.oferta!,
-                                                    activa: e.target.checked
-                                                }
-                                            })}
-                                            className="w-5 h-5 rounded accent-orange-500"
-                                        />
-                                        <label htmlFor="oferta-activa" className="text-stone-300 font-semibold">
-                                            Producto en oferta
-                                        </label>
-                                    </div>
-
-                                    {formData.oferta?.activa && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-stone-400 text-sm mb-2">Precio Original</label>
-                                                <input
-                                                    type="number"
-                                                    value={formData.oferta.precioOriginal}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        oferta: {
-                                                            ...formData.oferta!,
-                                                            precioOriginal: Number(e.target.value)
-                                                        }
-                                                    })}
-                                                    className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-stone-400 text-sm mb-2">Descuento (%)</label>
-                                                <input
-                                                    type="number"
-                                                    value={formData.oferta.descuento}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        oferta: {
-                                                            ...formData.oferta!,
-                                                            descuento: Number(e.target.value)
-                                                        }
-                                                    })}
-                                                    className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-stone-400 text-sm mb-2">Fecha Inicio</label>
-                                                <input
-                                                    type="date"
-                                                    value={formData.oferta.fechaInicio}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        oferta: {
-                                                            ...formData.oferta!,
-                                                            fechaInicio: e.target.value
-                                                        }
-                                                    })}
-                                                    className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-stone-400 text-sm mb-2">Fecha Fin</label>
-                                                <input
-                                                    type="date"
-                                                    value={formData.oferta.fechaFin}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        oferta: {
-                                                            ...formData.oferta!,
-                                                            fechaFin: e.target.value
-                                                        }
-                                                    })}
-                                                    className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-stone-400 text-sm mb-2">Etiqueta</label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.oferta.etiqueta || ''}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        oferta: {
-                                                            ...formData.oferta!,
-                                                            etiqueta: e.target.value
-                                                        }
-                                                    })}
-                                                    className="w-full bg-stone-800 border-2 border-stone-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-                                                    placeholder="Ej: Oferta de Primavera"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>

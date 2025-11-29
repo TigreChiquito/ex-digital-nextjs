@@ -2,6 +2,7 @@ import { Producto } from '@/context/CartContext';
 
 export const productos: Producto[] = [
   {
+    id: 1,
     nombre: "CA-9011379",
     precio: 7500,
     categoria: "Auriculares",
@@ -19,6 +20,7 @@ export const productos: Producto[] = [
     }
   },
   {
+    id: 2,
     nombre: "G213",
     precio: 10500,
     categoria: "Teclados",
@@ -36,6 +38,7 @@ export const productos: Producto[] = [
     }
   },
   {
+    id: 3,
     nombre: "G513",
     precio: 12500,
     categoria: "Teclados",
@@ -45,6 +48,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado mecánico premium con switches de alta precisión y reposamuñecas ergonómico. Rendimiento y comodidad en uno."
   },
   {
+    id: 4,
     nombre: "G915",
     precio: 18000,
     categoria: "Teclados",
@@ -54,6 +58,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado inalámbrico de perfil bajo con iluminación RGB y batería de larga duración. Estilo y rendimiento profesional."
   },
   {
+    id: 5,
     nombre: "K65",
     precio: 9500,
     categoria: "Teclados",
@@ -63,6 +68,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado compacto mecánico con retroiluminación brillante. Portátil y perfecto para gamers que necesitan movilidad."
   },
   {
+    id: 6,
     nombre: "M75",
     precio: 20000,
     categoria: "Mouses",
@@ -72,6 +78,7 @@ export const productos: Producto[] = [
     descripcion: "Mouse gamer de última generación con sensor de alta precisión y diseño ergonómico. Control absoluto en cada movimiento."
   },
   {
+    id: 7,
     nombre: "MAKR75",
     precio: 14000,
     categoria: "Teclados",
@@ -81,6 +88,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado mecánico personalizable con diseño compacto. Ideal para quienes buscan estilo, comodidad y velocidad."
   },
   {
+    id: 8,
     nombre: "VIRTUOSO_MAX",
     precio: 8050,
     categoria: "Auriculares",
@@ -98,6 +106,7 @@ export const productos: Producto[] = [
     }
   },
   {
+    id: 9,
     nombre: "M4Xy",
     precio: 20500,
     categoria: "Teclados",
@@ -107,6 +116,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado mecánico versátil con retroiluminación RGB y diseño robusto. Rendimiento confiable para trabajo y gaming."
   },
   {
+    id: 10,
     nombre: "M454",
     precio: 30500,
     categoria: "Mouses",
@@ -116,6 +126,7 @@ export const productos: Producto[] = [
     descripcion: "Mouse gamer con múltiples botones programables, sensor de alta precisión y diseño ergonómico. Hecho para los más competitivos."
   },
   {
+    id: 11,
     nombre: "G34",
     precio: 41500,
     categoria: "Teclados",
@@ -125,6 +136,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado premium con switches de respuesta rápida, retroiluminación personalizable y construcción duradera. Rendimiento profesional."
   },
   {
+    id: 12,
     nombre: "K99",
     precio: 25500,
     categoria: "Teclados",
@@ -134,6 +146,7 @@ export const productos: Producto[] = [
     descripcion: "Teclado económico con diseño compacto y funcional. Ideal para quienes buscan practicidad a bajo costo."
   },
   {
+    id: 13,
     nombre: "Astro A50 X",
     precio: 45000,
     categoria: "Auriculares",
@@ -143,6 +156,7 @@ export const productos: Producto[] = [
     descripcion: "Auriculares inalámbricos premium con audio espacial y base de carga. Diseñados para gamers profesionales que buscan lo mejor."
   },
   {
+    id: 14,
     nombre: "A50 McLaren Edition",
     precio: 52000,
     categoria: "Auriculares",
@@ -152,6 +166,7 @@ export const productos: Producto[] = [
     descripcion: "Edición limitada McLaren con diseño exclusivo y tecnología de audio avanzada. Estilo y rendimiento de competición."
   },
   {
+    id: 15,
     nombre: "G733",
     precio: 28000,
     categoria: "Auriculares",

@@ -49,13 +49,16 @@ export default function LoginPage() {
         const perfil = await obtenerPerfilUsuario();
         
         // Obtener el nombre y rol del usuario
-        const nombreUsuario = perfil.success && perfil.data?.name 
-            ? perfil.data.name 
-            : resultado.data?.name || email.split('@')[0];
+        const perfilData = perfil.data as { name?: string; role?: string } | undefined;
+        const resultadoData = resultado.data as { name?: string; role?: string } | undefined;
         
-        const rolUsuario = perfil.success && perfil.data?.role 
-            ? perfil.data.role 
-            : resultado.data?.role || 'USER';
+        const nombreUsuario = perfil.success && perfilData?.name 
+            ? perfilData.name 
+            : resultadoData?.name || email.split('@')[0];
+        
+        const rolUsuario = perfil.success && perfilData?.role 
+            ? perfilData.role 
+            : resultadoData?.role || 'USER';
         
         console.log('👤 Iniciando sesión con:', { nombreUsuario, rolUsuario, email });
         

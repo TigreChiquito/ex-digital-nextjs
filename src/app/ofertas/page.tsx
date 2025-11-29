@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { productos } from '@/data/productos';
+import { useState, useMemo, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Producto } from '@/context/CartContext';
-import { Flame, TrendingDown, Clock, ArrowLeft, Filter } from 'lucide-react';
+import { obtenerProductos, ProductDto } from '@/routes/Product';
+import { obtenerTodasCategorias, CategoryDto } from '@/routes/category';
+import { Flame, TrendingDown, ArrowLeft, Filter } from 'lucide-react';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
@@ -15,8 +16,49 @@ export default function OfertasPage() {
     const [ordenar, setOrdenar] = useState<string>('descuento-mayor');
     const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [productos, setProductos] = useState<ProductDto[]>([]);
+    const [categorias, setCategorias] = useState<CategoryDto[]>([]);
 
-    const handleAgregarClick = (producto: Producto) => {
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                const [respProductos, respCategorias] = await Promise.all([
+                    obtenerProductos(),
+                    obtenerTodasCategorias()
+                ]);
+                if (respProductos.success && respProductos.data) {
+                    setProductos(respProductos.data);
+                }
+                if (respCategorias.success && respCategorias.data) {
+                    setCategorias(respCategorias.data);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+            }
+        };
+        cargarDatos();
+    }, []);
+
+    const handleAgregarClick = (productoDto: ProductDto) => {
+        const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+        const producto: Producto = {
+            id: productoDto.productId,
+            nombre: productoDto.name,
+            precio: productoDto.value || 0,
+            categoria: categoria?.name || 'Sin categoría',
+            img: '/img/productos/default.avif',
+            img2: '/img/productos/default.avif',
+            img3: '/img/productos/default.avif',
+            descripcion: productoDto.description,
+            oferta: productoDto.discountId ? {
+                activa: true,
+                precioOriginal: productoDto.value || 0,
+                descuento: productoDto.discountPercentage || 0,
+                fechaInicio: '',
+                fechaFin: '',
+                etiqueta: 'Oferta'
+            } : undefined
+        };
         setSelectedProduct(producto);
         setIsModalOpen(true);
     };
@@ -40,20 +82,10 @@ export default function OfertasPage() {
         setTimeout(() => notification.remove(), 3000);
     };
 
-    // Filtrar productos en oferta activa
+    // Filtrar productos en oferta activa (con descuento)
     const productosEnOferta = useMemo(() => {
-        const hoy = new Date();
-        
-        return productos.filter(producto => {
-            if (!producto.oferta?.activa) return false;
-            
-            const fechaInicio = new Date(producto.oferta.fechaInicio);
-            const fechaFin = new Date(producto.oferta.fechaFin);
-            
-            // Verificar que la oferta esté dentro del rango de fechas
-            return hoy >= fechaInicio && hoy <= fechaFin;
-        });
-    }, []);
+        return productos.filter(producto => producto.discountId !== null);
+    }, [productos]);
 
     // Filtrar por descuento
     const productosFiltrados = useMemo(() => {
@@ -61,38 +93,26 @@ export default function OfertasPage() {
 
         // Aplicar filtro de descuento
         if (filtroDescuento === '20') {
-            filtrados = filtrados.filter(p => (p.oferta?.descuento || 0) >= 20);
+            filtrados = filtrados.filter(p => (p.discountPercentage || 0) >= 20);
         } else if (filtroDescuento === '30') {
-            filtrados = filtrados.filter(p => (p.oferta?.descuento || 0) >= 30);
+            filtrados = filtrados.filter(p => (p.discountPercentage || 0) >= 30);
         } else if (filtroDescuento === '50') {
-            filtrados = filtrados.filter(p => (p.oferta?.descuento || 0) >= 50);
+            filtrados = filtrados.filter(p => (p.discountPercentage || 0) >= 50);
         }
 
         // Ordenar
         if (ordenar === 'descuento-mayor') {
-            filtrados.sort((a, b) => (b.oferta?.descuento || 0) - (a.oferta?.descuento || 0));
+            filtrados.sort((a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0));
         } else if (ordenar === 'descuento-menor') {
-            filtrados.sort((a, b) => (a.oferta?.descuento || 0) - (b.oferta?.descuento || 0));
+            filtrados.sort((a, b) => (a.discountPercentage || 0) - (b.discountPercentage || 0));
         } else if (ordenar === 'precio-menor') {
-            filtrados.sort((a, b) => a.precio - b.precio);
+            filtrados.sort((a, b) => (a.value || 0) - (b.value || 0));
         } else if (ordenar === 'precio-mayor') {
-            filtrados.sort((a, b) => b.precio - a.precio);
+            filtrados.sort((a, b) => (b.value || 0) - (a.value || 0));
         }
 
         return filtrados;
     }, [productosEnOferta, filtroDescuento, ordenar]);
-
-    // Calcular días restantes para la oferta
-    const calcularDiasRestantes = () => {
-        if (productosEnOferta.length === 0) return 0;
-        const fechaFin = new Date(productosEnOferta[0].oferta!.fechaFin);
-        const hoy = new Date();
-        const diffTime = fechaFin.getTime() - hoy.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    };
-
-    const diasRestantes = calcularDiasRestantes();
 
     return (
         <div className="min-h-screen py-12 px-4">
@@ -118,18 +138,8 @@ export default function OfertasPage() {
                             <Flame className="w-12 h-12 text-pink-400 animate-pulse" />
                         </div>
                         <p className="text-stone-400 text-xl mb-4">
-                            Aprovecha descuentos de hasta {Math.max(...productosEnOferta.map(p => p.oferta?.descuento || 0))}% en productos seleccionados
+                            Aprovecha descuentos de hasta {Math.max(...productosEnOferta.map(p => p.discountPercentage || 0))}% en productos seleccionados
                         </p>
-
-                        {/* Contador de tiempo */}
-                        {diasRestantes > 0 && (
-                            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-pink-500/20 to-rose-500/20 border-2 border-pink-400 text-pink-300 px-6 py-3 rounded-full animate-pulse-slow backdrop-blur-sm">
-                                <Clock className="w-5 h-5" />
-                                <span className="font-bold">
-                                    {diasRestantes === 1 ? '¡Último día!' : `Quedan ${diasRestantes} días`}
-                                </span>
-                            </div>
-                        )}
                     </div>
 
                     {/* Estadísticas */}
@@ -141,13 +151,8 @@ export default function OfertasPage() {
                         </div>
                         <div className="bg-gradient-to-br from-rose-400 to-orange-400 rounded-3xl p-6 text-white text-center shadow-2xl hover:scale-105 transition-transform">
                             <Flame className="w-10 h-10 mx-auto mb-3" />
-                            <p className="text-4xl font-black mb-2">Hasta {Math.max(...productosEnOferta.map(p => p.oferta?.descuento || 0))}%</p>
+                            <p className="text-4xl font-black mb-2">Hasta {Math.max(...productosEnOferta.map(p => p.discountPercentage || 0))}%</p>
                             <p className="text-white/90">Descuento máximo</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-orange-400 to-yellow-400 rounded-3xl p-6 text-white text-center shadow-2xl hover:scale-105 transition-transform">
-                            <Clock className="w-10 h-10 mx-auto mb-3" />
-                            <p className="text-4xl font-black mb-2">{diasRestantes}</p>
-                            <p className="text-white/90">Días restantes</p>
                         </div>
                     </div>
 
@@ -196,14 +201,35 @@ export default function OfertasPage() {
                 {/* Grid de productos */}
                 {productosFiltrados.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {productosFiltrados.map((producto, index) => (
-                            <div key={producto.nombre} className="animate-scale-in" style={{ animationDelay: `${index * 0.05}s` }}>
-                                <ProductCard
-                                    producto={producto}
-                                    onAgregar={handleAgregarClick}
-                                />
-                            </div>
-                        ))}
+                        {productosFiltrados.map((productoDto, index) => {
+                            const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+                            const producto: Producto = {
+                                id: productoDto.productId,
+                                nombre: productoDto.name,
+                                precio: productoDto.value || 0,
+                                categoria: categoria?.name || 'Sin categoría',
+                                img: '/img/productos/default.avif',
+                                img2: '/img/productos/default.avif',
+                                img3: '/img/productos/default.avif',
+                                descripcion: productoDto.description,
+                                oferta: productoDto.discountId ? {
+                                    activa: true,
+                                    precioOriginal: productoDto.value || 0,
+                                    descuento: productoDto.discountPercentage || 0,
+                                    fechaInicio: '',
+                                    fechaFin: '',
+                                    etiqueta: 'Oferta'
+                                } : undefined
+                            };
+                            return (
+                                <div key={productoDto.productId} className="animate-scale-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                                    <ProductCard
+                                        producto={producto}
+                                        onAgregar={() => handleAgregarClick(productoDto)}
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-20">

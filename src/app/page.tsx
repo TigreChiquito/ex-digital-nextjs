@@ -1,32 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Carousel from '@/components/Carousel';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import { useCart } from '@/context/CartContext';
-import { productos } from '@/data/productos';
 import { Producto } from '@/context/CartContext';
+import { obtenerProductos, ProductDto } from '@/routes/Product';
+import { obtenerTodasCategorias, CategoryDto } from '@/routes/category';
 import { Sparkles, Zap, Shield, Heart, Flame, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { agregarAlCarrito } = useCart();
+    const [productos, setProductos] = useState<ProductDto[]>([]);
+    const [categorias, setCategorias] = useState<CategoryDto[]>([]);
 
-  // Verificar si hay productos en oferta activa
-  const productosEnOferta = productos.filter(producto => {
-    if (!producto.oferta?.activa) return false;
-    
-    const hoy = new Date();
-    const fechaInicio = new Date(producto.oferta.fechaInicio);
-    const fechaFin = new Date(producto.oferta.fechaFin);
-    
-    return hoy >= fechaInicio && hoy <= fechaFin;
-  });
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                console.log('Cargando productos y categorías desde la API...');
+                const [respProductos, respCategorias] = await Promise.all([
+                    obtenerProductos(),
+                    obtenerTodasCategorias()
+                ]);
+                console.log('Respuesta productos:', respProductos);
+                console.log('Respuesta categorías:', respCategorias);
+                if (respProductos.success && respProductos.data) {
+                    console.log('Productos cargados:', respProductos.data.length);
+                    setProductos(respProductos.data);
+                }
+                if (respCategorias.success && respCategorias.data) {
+                    console.log('Categorías cargadas:', respCategorias.data.length);
+                    setCategorias(respCategorias.data);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+            }
+        };
+        cargarDatos();
+    }, []);
 
-  const handleAgregarClick = (producto: Producto) => {
+  // Verificar si hay productos en oferta activa (con descuento)
+  const productosEnOferta = productos.filter(producto => producto.discountId !== null);
+
+  const handleAgregarClick = (productoDto: ProductDto) => {
+    const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+    const producto: Producto = {
+      id: productoDto.productId,
+      nombre: productoDto.name,
+      precio: productoDto.value || 0,
+      categoria: categoria?.name || 'Sin categoría',
+      img: '/img/productos/default.avif',
+      img2: '/img/productos/default.avif',
+      img3: '/img/productos/default.avif',
+      descripcion: productoDto.description,
+      oferta: productoDto.discountId ? {
+        activa: true,
+        precioOriginal: productoDto.value || 0,
+        descuento: productoDto.discountPercentage || 0,
+        fechaInicio: '',
+        fechaFin: '',
+        etiqueta: 'Oferta'
+      } : undefined
+    };
     setSelectedProduct(producto);
     setIsModalOpen(true);
   };
@@ -76,7 +115,7 @@ export default function Home() {
                         ¡Ofertas de Primavera!
                       </h2>
                       <p className="text-pink-200 text-lg md:text-xl">
-                        Hasta {Math.max(...productosEnOferta.map(p => p.oferta?.descuento || 0))}% de descuento en productos seleccionados
+                        Hasta {Math.max(...productosEnOferta.map(p => p.discountPercentage || 0))}% de descuento en productos seleccionados
                       </p>
                     </div>
                   </div>
@@ -161,13 +200,43 @@ export default function Home() {
 
         {/* Grid de Productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {productos.map((producto, index) => (
-            <ProductCard
-              key={index}
-              producto={producto}
-              onAgregar={handleAgregarClick}
-            />
-          ))}
+          {productos.length === 0 ? (
+            <div className="col-span-full text-center py-20">
+              <div className="bg-stone-900/90 backdrop-blur-md rounded-3xl p-12 border-2 border-stone-800 inline-block">
+                <p className="text-stone-400 text-xl mb-4">⏳ Cargando productos...</p>
+                <p className="text-stone-500 text-sm">Si los productos no cargan, puede haber un problema con el servidor.</p>
+              </div>
+            </div>
+          ) : (
+            productos.map((productoDto) => {
+              const categoria = categorias.find(c => c.categoryId === productoDto.categoryId);
+            const producto: Producto = {
+              id: productoDto.productId,
+              nombre: productoDto.name,
+              precio: productoDto.value || 0,
+              categoria: categoria?.name || 'Sin categoría',
+                img: '/img/productos/default.avif',
+                img2: '/img/productos/default.avif',
+                img3: '/img/productos/default.avif',
+                descripcion: productoDto.description,
+              oferta: productoDto.discountId ? {
+                activa: true,
+                precioOriginal: productoDto.value || 0,
+                descuento: productoDto.discountPercentage || 0,
+                  fechaInicio: '',
+                  fechaFin: '',
+                  etiqueta: 'Oferta'
+                } : undefined
+              };
+              return (
+                <ProductCard
+                  key={productoDto.productId}
+                  producto={producto}
+                  onAgregar={() => handleAgregarClick(productoDto)}
+                />
+              );
+            })
+          )}
         </div>
 
         {/* CTA Section oscura */}

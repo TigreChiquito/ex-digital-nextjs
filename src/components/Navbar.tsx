@@ -8,12 +8,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ShoppingCart, Menu, X, User, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { categoriasConfig, CategoriaConfig } from '../utils/categoriasConfig';
-import { productos } from '@/data/productos';
+import { obtenerProductos } from '@/routes/Product';
 import Image from 'next/image';
 
 export default function Navbar() {
@@ -26,16 +26,18 @@ export default function Navbar() {
     const { usuario, cerrarSesion, estaLogueado, esAdmin } = useAuth();
 
     const cantidadProductos = obtenerCantidadTotal();
+    const [hayOfertasActivas, setHayOfertasActivas] = useState(false);
 
     // Verificar si hay ofertas activas
-    const hayOfertasActivas = useMemo(() => {
-        const hoy = new Date();
-        return productos.some(producto => {
-            if (!producto.oferta?.activa) return false;
-            const fechaInicio = new Date(producto.oferta.fechaInicio);
-            const fechaFin = new Date(producto.oferta.fechaFin);
-            return hoy >= fechaInicio && hoy <= fechaFin;
-        });
+    useEffect(() => {
+        const verificarOfertas = async () => {
+            const resp = await obtenerProductos();
+            if (resp.success && resp.data) {
+                const tieneOfertas = resp.data.some(p => p.discountId !== null);
+                setHayOfertasActivas(tieneOfertas);
+            }
+        };
+        verificarOfertas();
     }, []);
 
     // Función para mostrar menú de categorías
