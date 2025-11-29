@@ -1,7 +1,9 @@
 'use client';
 
 import { Producto } from '@/context/CartContext';
-import { ShoppingCart, Sparkles, Flame, TrendingDown } from 'lucide-react';
+import { ShoppingCart, Sparkles, Flame, TrendingDown, ImageOff } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface ProductCardProps {
     producto: Producto;
@@ -9,6 +11,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
+    // Estado para controlar errores de imagen
+    const [imgError, setImgError] = useState(false);
+
     // Verificar si el producto tiene oferta activa y dentro del rango de fechas
     const tieneOfertaActiva = () => {
         if (!producto.oferta?.activa) return false;
@@ -30,33 +35,45 @@ export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
                 : 'border-stone-700 hover:border-orange-500 hover:shadow-orange-600/30'
         }`}>
             {/* Imagen con fondo más claro para contraste */}
-            <div className="relative h-56 bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={producto.img}
-                    alt={producto.nombre}
-                    className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
-                />
+            <div className="relative h-56 bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden flex items-center justify-center">
+                
+                {!imgError ? (
+                    <Image
+                        src={producto.img}
+                        alt={producto.nombre}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
+                        onError={() => setImgError(true)}
+                        priority={false}
+                    />
+                ) : (
+                    // Fallback si la imagen falla
+                    <div className="flex flex-col items-center justify-center text-stone-400 p-4">
+                        <ImageOff className="w-12 h-12 mb-2 opacity-50" />
+                        <span className="text-xs text-center opacity-70">Imagen no disponible</span>
+                    </div>
+                )}
 
                 {/* Badge de oferta o nuevo */}
                 {enOferta ? (
                     <>
                         {/* Badge de descuento */}
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse border-2 border-pink-300/50">
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse border-2 border-pink-300/50 z-10">
                             <Flame className="w-3 h-3" />
                             <span>-{producto.oferta?.descuento}%</span>
                         </div>
 
                         {/* Etiqueta de oferta */}
                         {producto.oferta?.etiqueta && (
-                            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 border-2 border-yellow-300/50">
+                            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 border-2 border-yellow-300/50 z-10">
                                 <TrendingDown className="w-3 h-3" />
                                 <span>{producto.oferta.etiqueta}</span>
                             </div>
                         )}
                     </>
                 ) : (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse-slow">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse-slow z-10">
                         <Sparkles className="w-3 h-3" />
                         <span>Nuevo</span>
                     </div>
