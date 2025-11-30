@@ -6,13 +6,14 @@ interface ApiResponse<T> {
     data?: T;
 }
 
-interface CreateCategoryRequest {
+export interface CreateCategoryRequest {
     name: string;
     description: string;
 }
 
-interface CategoryDto {
-    categoryId: number;
+export interface CategoryDto {
+    categoryId: number; // El frontend usará este nombre
+    idCategories?: number; // El backend envía este
     name: string;
     description: string;
     createdAt?: string;
@@ -26,7 +27,9 @@ export async function obtenerTodasCategorias(): Promise<ApiResponse<CategoryDto[
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            mode: 'cors',
+            cache: 'no-cache'
         });
 
         if (!response.ok) {
@@ -36,8 +39,15 @@ export async function obtenerTodasCategorias(): Promise<ApiResponse<CategoryDto[
         }
 
         const data = await response.json();
-        console.log('Categorías obtenidas:', data);
-        return { success: true, data: data.data || data };
+        
+        // CORRECCIÓN CRÍTICA: Mapeo de idCategories -> categoryId
+        const categorias = (data.data || data || []).map((c: any) => ({
+            ...c,
+            categoryId: c.idCategories, // Mapeamos el campo del backend al del frontend
+        }));
+
+        console.log('Categorías normalizadas:', categorias);
+        return { success: true, data: categorias };
     } catch (error) {
         console.error('Error al obtener categorías:', error);
         return { success: false, message: 'Error de conexión' };
@@ -55,16 +65,22 @@ export async function obtenerCategoriaPorId(categoryId: number): Promise<ApiResp
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error HTTP:', response.status, errorText);
             return { success: false, message: `Error del servidor: ${response.status}` };
         }
 
         const data = await response.json();
-        console.log('Categoría obtenida:', data);
-        return { success: true, data: data.data };
+        
+        // Mapeo para un solo objeto
+        let categoria = null;
+        if (data.data) {
+            categoria = {
+                ...data.data,
+                categoryId: data.data.idCategories
+            };
+        }
+
+        return { success: true, data: categoria };
     } catch (error) {
-        console.error('Error al obtener categoría:', error);
         return { success: false, message: 'Error de conexión' };
     }
 }
@@ -77,8 +93,6 @@ export async function crearCategoria(categoria: CreateCategoryRequest): Promise<
             return { success: false, message: 'No hay token de autenticación' };
         }
 
-        console.log('Creando categoría:', categoria);
-
         const response = await fetch('https://exdigital-api-production.up.railway.app/api/categories', {
             method: 'POST',
             headers: {
@@ -89,16 +103,12 @@ export async function crearCategoria(categoria: CreateCategoryRequest): Promise<
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error HTTP:', response.status, errorText);
             return { success: false, message: `Error del servidor: ${response.status}` };
         }
 
         const data = await response.json();
-        console.log('Categoría creada:', data);
         return { success: true, data: data.data, message: data.message };
     } catch (error) {
-        console.error('Error al crear categoría:', error);
         return { success: false, message: 'Error de conexión' };
     }
 }
@@ -111,8 +121,6 @@ export async function actualizarCategoria(categoryId: number, categoria: CreateC
             return { success: false, message: 'No hay token de autenticación' };
         }
 
-        console.log('Actualizando categoría:', categoryId, categoria);
-
         const response = await fetch(`https://exdigital-api-production.up.railway.app/api/categories/${categoryId}`, {
             method: 'PUT',
             headers: {
@@ -123,16 +131,12 @@ export async function actualizarCategoria(categoryId: number, categoria: CreateC
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error HTTP:', response.status, errorText);
             return { success: false, message: `Error del servidor: ${response.status}` };
         }
 
         const data = await response.json();
-        console.log('Categoría actualizada:', data);
         return { success: true, data: data.data, message: data.message };
     } catch (error) {
-        console.error('Error al actualizar categoría:', error);
         return { success: false, message: 'Error de conexión' };
     }
 }
@@ -145,8 +149,6 @@ export async function eliminarCategoria(categoryId: number): Promise<ApiResponse
             return { success: false, message: 'No hay token de autenticación' };
         }
 
-        console.log('Eliminando categoría:', categoryId);
-
         const response = await fetch(`https://exdigital-api-production.up.railway.app/api/categories/${categoryId}`, {
             method: 'DELETE',
             headers: {
@@ -156,18 +158,14 @@ export async function eliminarCategoria(categoryId: number): Promise<ApiResponse
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error HTTP:', response.status, errorText);
             return { success: false, message: `Error del servidor: ${response.status}` };
         }
 
         const data = await response.json();
-        console.log('Categoría eliminada:', data);
         return { success: true, message: data.message };
     } catch (error) {
-        console.error('Error al eliminar categoría:', error);
         return { success: false, message: 'Error de conexión' };
     }
 }
 
-export type { ApiResponse, CreateCategoryRequest, CategoryDto };
+export type { ApiResponse };

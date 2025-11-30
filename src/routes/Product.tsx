@@ -20,7 +20,8 @@ export interface UpdateProductRequest extends CreateProductRequest {
 }
 
 export interface ProductDto {
-    productId: number;
+    productId: number; // Frontend espera esto
+    idProduct?: number; // Backend envía esto
     name: string;
     value?: number;
     price?: number;
@@ -35,41 +36,34 @@ export interface ProductDto {
     finalPrice?: number;
 }
 
-// obtenerProductos: realiza una llamada a la API para obtener la lista de productos
 export async function obtenerProductos(): Promise<ApiResponse<ProductDto[]>> {
     try {
         const response = await fetch('https://exdigital-api-production.up.railway.app/api/products', {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             mode: 'cors',
             cache: 'no-cache'
         });
 
-        if (!response.ok) {
-            return { success: false, message: `Error del servidor: ${response.status}` };
-        }
+        if (!response.ok) return { success: false, message: `Error: ${response.status}` };
 
         const data = await response.json();
         
-        if (!data.success && data.message) {
-            return { success: false, message: data.message, data: [] };
-        }
-        
-        // CORRECCIÓN CRÍTICA: Mapeo de campos del Backend (idProduct) al Frontend (productId)
-        const productos = (data.data || data || []).map((p: any) => ({
+        // 🔥 CORRECCIÓN DE MAPEO: Asegura que todos los campos existan
+        const productos = (data.data || []).map((p: any) => ({
             ...p,
-            productId: p.idProduct, // Mapeamos idProduct a productId
+            productId: p.idProduct, // Mapeo crítico para las Keys de React
             value: p.value || p.price || 0,
             primaryImage: p.primaryImage || null,
-            imageUrls: p.imageUrls || []
+            imageUrls: p.imageUrls || [],
+            // Corrección para filtros: Asegurar que categoryId sea número
+            categoryId: Number(p.categoryId)
         }));
         
         return { success: true, data: productos };
     } catch (error) {
-        console.error('Error en obtenerProductos:', error);
-        return { success: false, message: 'Error de conexión con la API', data: [] };
+        console.error(error);
+        return { success: false, message: 'Error de conexión', data: [] };
     }
 }
 

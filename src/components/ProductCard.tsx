@@ -1,7 +1,7 @@
 'use client';
 
 import { Producto } from '@/context/CartContext';
-import { ShoppingCart, Sparkles, Flame, TrendingDown, ImageOff } from 'lucide-react';
+import { ShoppingCart, Sparkles, Flame, TrendingDown, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -11,33 +11,28 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
-    // Estado para controlar errores de imagen
     const [imgError, setImgError] = useState(false);
+    
+    // Detectar si estamos usando la imagen fallback del backend o si falló la carga
+    const mostrarFallback = imgError || !producto.img || producto.img.includes('carrito-de-compras.png');
 
-    // Verificar si el producto tiene oferta activa y dentro del rango de fechas
     const tieneOfertaActiva = () => {
         if (!producto.oferta?.activa) return false;
-        
         const hoy = new Date();
         const fechaInicio = new Date(producto.oferta.fechaInicio);
         const fechaFin = new Date(producto.oferta.fechaFin);
-        
         return hoy >= fechaInicio && hoy <= fechaFin;
     };
 
     const enOferta = tieneOfertaActiva();
-    const ahorro = enOferta && producto.oferta ? producto.oferta.precioOriginal - producto.precio : 0;
 
     return (
         <div className={`group bg-stone-800 rounded-3xl overflow-hidden border-2 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl animate-fade-in ${
-            enOferta 
-                ? 'border-pink-500/50 hover:border-pink-400 shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40' 
-                : 'border-stone-700 hover:border-orange-500 hover:shadow-orange-600/30'
+            enOferta ? 'border-pink-500/50 hover:border-pink-400' : 'border-stone-700 hover:border-orange-500'
         }`}>
-            {/* Imagen con fondo más claro para contraste */}
-            <div className="relative h-56 bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden flex items-center justify-center">
-                
-                {!imgError ? (
+            {/* Imagen */}
+            <div className="relative h-56 w-full bg-gradient-to-br from-stone-700 via-stone-600 to-stone-700 overflow-hidden flex items-center justify-center">
+                {!mostrarFallback ? (
                     <Image
                         src={producto.img}
                         alt={producto.nombre}
@@ -45,96 +40,45 @@ export default function ProductCard({ producto, onAgregar }: ProductCardProps) {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
                         onError={() => setImgError(true)}
-                        priority={false}
+                        priority={true} // Carga rápida
                     />
                 ) : (
-                    // Fallback si la imagen falla
-                    <div className="flex flex-col items-center justify-center text-stone-400 p-4">
-                        <ImageOff className="w-12 h-12 mb-2 opacity-50" />
-                        <span className="text-xs text-center opacity-70">Imagen no disponible</span>
+                    // Fallback Elegante
+                    <div className="flex flex-col items-center justify-center text-stone-500 opacity-50">
+                        <ImageIcon className="w-12 h-12 mb-2" />
+                        <span className="text-xs font-medium">Sin Imagen</span>
                     </div>
                 )}
-
-                {/* Badge de oferta o nuevo */}
+                
+                {/* Badges se mantienen igual */}
                 {enOferta ? (
-                    <>
-                        {/* Badge de descuento */}
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse border-2 border-pink-300/50 z-10">
-                            <Flame className="w-3 h-3" />
-                            <span>-{producto.oferta?.descuento}%</span>
-                        </div>
-
-                        {/* Etiqueta de oferta */}
-                        {producto.oferta?.etiqueta && (
-                            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 border-2 border-yellow-300/50 z-10">
-                                <TrendingDown className="w-3 h-3" />
-                                <span>{producto.oferta.etiqueta}</span>
-                            </div>
-                        )}
-                    </>
+                    <div className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 animate-pulse z-10">
+                        <Flame className="w-3 h-3" /><span>-{producto.oferta?.descuento}%</span>
+                    </div>
                 ) : (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 animate-pulse-slow z-10">
-                        <Sparkles className="w-3 h-3" />
-                        <span>Nuevo</span>
+                    <div className="absolute top-4 right-4 bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 z-10">
+                        <Sparkles className="w-3 h-3" /><span>Nuevo</span>
                     </div>
                 )}
             </div>
 
-            {/* Contenido con mejor contraste */}
+            {/* Contenido */}
             <div className="p-6 flex flex-col flex-grow bg-stone-800">
-                <h3 className="text-xl font-bold text-stone-100 mb-3 line-clamp-1 group-hover:text-orange-400 transition-colors">
-                    {producto.nombre}
-                </h3>
-
-                <p className="text-sm text-stone-300 mb-4 line-clamp-2 flex-grow leading-relaxed">
-                    {producto.descripcion}
-                </p>
-
-                <div className="mt-auto space-y-4">
-                    {/* Precio con fondo destacado */}
-                    <div className={`flex flex-col bg-gradient-to-r p-4 rounded-2xl border-2 shadow-inner ${
-                        enOferta 
-                            ? 'from-pink-950 to-rose-950 border-pink-700/50' 
-                            : 'from-stone-900 to-stone-950 border-stone-700'
-                    }`}>
-                        {enOferta && producto.oferta && (
-                            <>
-                                {/* Precio original tachado */}
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="text-lg text-stone-400 line-through font-medium">
-                                        ${producto.oferta.precioOriginal.toLocaleString('es-CL')}
-                                    </span>
-                                    <span className="text-xs text-pink-300 font-bold bg-pink-900/40 px-2 py-1 rounded-full border border-pink-700/50">
-                                        AHORRA ${ahorro.toLocaleString('es-CL')}
-                                    </span>
-                                </div>
-                            </>
-                        )}
-                        
-                        {/* Precio actual */}
-                        <div className="flex items-baseline justify-between">
-                            <span className={`text-3xl font-bold bg-clip-text text-transparent drop-shadow-lg ${
-                                enOferta 
-                                    ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400' 
-                                    : 'bg-gradient-to-r from-orange-400 via-orange-300 to-yellow-400'
-                            }`}>
-                                ${producto.precio.toLocaleString('es-CL')}
-                            </span>
-                            <span className="text-xs text-stone-400 font-bold uppercase tracking-wide">CLP</span>
-                        </div>
+                <h3 className="text-xl font-bold text-stone-100 mb-2 line-clamp-1">{producto.nombre}</h3>
+                <p className="text-sm text-stone-300 mb-4 line-clamp-2 flex-grow">{producto.descripcion}</p>
+                
+                <div className="mt-auto">
+                    <div className="flex items-baseline justify-between mb-4">
+                        <span className="text-2xl font-bold text-orange-400">
+                            ${producto.precio.toLocaleString('es-CL')}
+                        </span>
+                        <span className="text-xs text-stone-500 font-bold">CLP</span>
                     </div>
-
-                    {/* Botón más visible con gradiente y sombra */}
                     <button
                         onClick={() => onAgregar(producto)}
-                        className={`w-full text-white py-3.5 px-4 rounded-2xl transition-all font-bold shadow-xl flex items-center justify-center space-x-2 group-hover:scale-105 border ${
-                            enOferta
-                                ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 shadow-pink-500/40 hover:shadow-2xl hover:shadow-pink-500/60 border-pink-400/50'
-                                : 'bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 hover:from-orange-700 hover:via-orange-600 hover:to-orange-700 shadow-orange-600/40 hover:shadow-2xl hover:shadow-orange-600/60 border-orange-500/50'
-                        }`}
+                        className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:to-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-orange-500/20"
                     >
-                        <ShoppingCart className="w-5 h-5" />
-                        <span>Agregar al Carrito</span>
+                        <ShoppingCart className="w-5 h-5" /> Agregar
                     </button>
                 </div>
             </div>
