@@ -41,7 +41,7 @@ export async function obtenerTodasCategorias(): Promise<ApiResponse<CategoryDto[
         const data = await response.json();
         
         // CORRECCIÓN CRÍTICA: Mapeo de idCategories -> categoryId
-        const categorias = (data.data || data || []).map((c: any) => ({
+        const categorias = (data.data || data || []).map((c: CategoryDto) => ({
             ...c,
             categoryId: c.idCategories, // Mapeamos el campo del backend al del frontend
         }));

@@ -31,13 +31,12 @@ const CartItemImage = ({ src, alt }: { src: string, alt: string }) => {
     }
 
     // Usamos <img> estándar para evitar problemas de optimización de Next.js en local
-    // eslint-disable-next-line @next/next/no-img-element
     return (
         <img
             src={safeSrc}
             alt={alt}
             className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105"
-            onError={(e) => {
+            onError={() => {
                 console.error(`Error cargando: ${safeSrc}`);
                 setImgError(true);
             }}

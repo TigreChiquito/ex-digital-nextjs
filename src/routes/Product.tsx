@@ -50,7 +50,7 @@ export async function obtenerProductos(): Promise<ApiResponse<ProductDto[]>> {
         const data = await response.json();
         
         // 🔥 CORRECCIÓN DE MAPEO: Asegura que todos los campos existan
-        const productos = (data.data || []).map((p: any) => ({
+        const productos = (data.data || []).map((p: ProductDto) => ({
             ...p,
             productId: p.idProduct, // Mapeo crítico para las Keys de React
             value: p.value || p.price || 0,

@@ -1,7 +1,7 @@
 'use client';
 
 import { Producto } from '@/context/CartContext';
-import { ShoppingCart, Sparkles, Flame, TrendingDown, Image as ImageIcon } from 'lucide-react';
+import { ShoppingCart, Sparkles, Flame, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 

@@ -226,7 +226,7 @@ export default function ProductosPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-stone-300 mb-3 uppercase tracking-wide">Ordenar Por</label>
-                                    <select value={ordenamiento} onChange={(e) => setOrdenamiento(e.target.value as any)} className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 focus:outline-none focus:ring-4 focus:ring-orange-900">
+                                    <select value={ordenamiento} onChange={(e) => setOrdenamiento(e.target.value as '' | 'menor' | 'mayor' | 'nombre')} className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 focus:outline-none focus:ring-4 focus:ring-orange-900">
                                         <option value="">Sin ordenar</option>
                                         <option value="menor">Precio: Menor a Mayor</option>
                                         <option value="mayor">Precio: Mayor a Menor</option>
