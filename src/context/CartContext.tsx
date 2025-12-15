@@ -33,6 +33,8 @@ interface CartContextType {
     vaciarCarrito: () => void;
     obtenerTotal: () => number;
     obtenerCantidadTotal: () => number;
+    requiereFactura: boolean;
+    setRequiereFactura: (value: boolean) => void;
     isLoaded: boolean;
 }
 
@@ -40,6 +42,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
     const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
+    const [requiereFactura, setRequiereFactura] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Cargar carrito desde localStorage al montar
@@ -47,6 +50,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const carritoGuardado = localStorage.getItem('carrito');
         if (carritoGuardado) {
             setCarrito(JSON.parse(carritoGuardado));
+        }
+        const facturaGuardada = localStorage.getItem('requiereFactura');
+        if (facturaGuardada) {
+            setRequiereFactura(JSON.parse(facturaGuardada));
         }
         setIsLoaded(true);
     }, []);
@@ -57,6 +64,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('carrito', JSON.stringify(carrito));
         }
     }, [carrito, isLoaded]);
+
+    // Guardar estado de factura en localStorage
+    useEffect(() => {
+        if (isLoaded) {
+            localStorage.setItem('requiereFactura', JSON.stringify(requiereFactura));
+        }
+    }, [requiereFactura, isLoaded]);
 
     const agregarAlCarrito = (producto: Producto, cantidad: number = 1) => {
         setCarrito(prevCarrito => {
@@ -107,6 +121,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             vaciarCarrito,
             obtenerTotal,
             obtenerCantidadTotal,
+            requiereFactura,
+            setRequiereFactura,
             isLoaded
         }}>
             {children}

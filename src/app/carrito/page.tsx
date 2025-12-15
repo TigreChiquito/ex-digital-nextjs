@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function CarritoPage() {
-    const { carrito, eliminarDelCarrito, actualizarCantidad, obtenerTotal, vaciarCarrito } = useCart();
+    const { carrito, eliminarDelCarrito, actualizarCantidad, obtenerTotal, vaciarCarrito, requiereFactura, setRequiereFactura } = useCart();
     const [confirmandoEliminar, setConfirmandoEliminar] = useState<number | null>(null);
     const [confirmandoVaciar, setConfirmandoVaciar] = useState(false);
 
@@ -263,6 +263,32 @@ export default function CarritoPage() {
                                     </div>
                                     <p className="text-stone-500 text-xs mt-1">CLP</p>
                                 </div>
+                            </div>
+
+                            {/* Checkbox para factura */}
+                            <div className="mb-6">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            checked={requiereFactura}
+                                            onChange={(e) => setRequiereFactura(e.target.checked)}
+                                            className="peer sr-only"
+                                        />
+                                        <div className="w-6 h-6 bg-stone-800 border-2 border-stone-700 rounded-lg peer-checked:bg-teal-600 peer-checked:border-teal-600 transition-all group-hover:border-stone-600"></div>
+                                        <svg
+                                            className="absolute top-1 left-1 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-stone-300 font-semibold group-hover:text-stone-200 transition-colors">
+                                        Requiero factura
+                                    </span>
+                                </label>
                             </div>
 
                             {/* Botón de compra */}

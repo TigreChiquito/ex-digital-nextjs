@@ -26,7 +26,7 @@ const comunas: { [key: string]: string[] } = {
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { carrito, obtenerTotal, vaciarCarrito } = useCart();
+    const { carrito, obtenerTotal, vaciarCarrito, requiereFactura } = useCart();
     const { usuario, estaLogueado } = useAuth();
 
     // Estados del formulario
@@ -39,9 +39,15 @@ export default function CheckoutPage() {
     const [region, setRegion] = useState('');
     const [comuna, setComuna] = useState('');
     const [indicaciones, setIndicaciones] = useState('');
+    const [razonSocial, setRazonSocial] = useState('');
+    const [rut, setRut] = useState('');
+    const [giro, setGiro] = useState('');
+    const [direccionFactura, setDireccionFactura] = useState('');
     const [error, setError] = useState('');
     const [procesando, setProcesando] = useState(false);
     const [pagoExitoso, setPagoExitoso] = useState(false);
+    const [consultandoRut, setConsultandoRut] = useState(false);
+    const [rutError, setRutError] = useState('');
 
     // Auto-completar datos del usuario
     useEffect(() => {
@@ -51,6 +57,67 @@ export default function CheckoutPage() {
             setEmail(usuario.email || '');
         }
     }, [usuario, estaLogueado]);
+
+    // Función para consultar RUT en la API
+    const consultarRut = async (rutIngresado: string) => {
+        // Validar formato básico de RUT (mínimo 8 caracteres sin contar puntos y guiones)
+        const rutLimpio = rutIngresado.replace(/\./g, '').replace(/-/g, '');
+        
+        if (rutLimpio.length < 8) {
+            return;
+        }
+
+        console.log('Consultando RUT...');
+        setConsultandoRut(true);
+        setRutError('');
+
+        try {
+            // Enviar el RUT con su formato original (puede incluir puntos y guión)
+            const response = await fetch(`/api/consultar-rut?rut=${encodeURIComponent(rutIngresado)}`);
+
+            if (!response.ok) {
+                throw new Error('RUT no encontrado');
+            }
+
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+
+            // Autocompletar campos con los datos obtenidos
+            if (data.razonSocial) {
+                setRazonSocial(data.razonSocial);
+            }
+
+            // Tomar el primer domicilio
+            if (data.domicilios && data.domicilios.length > 0) {
+                const domicilio = data.domicilios[0];
+                const direccionCompleta = `${domicilio.direccion.trim()}, ${domicilio.comuna}`;
+                setDireccionFactura(direccionCompleta);
+            }
+
+            // Mostrar mensaje de éxito
+            setRutError('');
+        } catch (error) {
+            console.error('Error consultando RUT:', error);
+            setRutError('No se encontró información para este RUT. Ingresa los datos manualmente.');
+            // Limpiar campos si hay error
+            setRazonSocial('');
+            setDireccionFactura('');
+        } finally {
+            console.log('Finalizando consulta');
+            setConsultandoRut(false);
+        }
+    };
+
+    // Efecto para consultar el RUT cuando se ingresa
+    useEffect(() => {
+        if (rut && requiereFactura) {
+            const timeoutId = setTimeout(() => {
+                consultarRut(rut);
+            }, 1000); // Esperar 1 segundo después de que el usuario deje de escribir
+
+            return () => clearTimeout(timeoutId);
+        }
+    }, [rut, requiereFactura]);
 
     // Redirigir si el carrito está vacío (excepto si el pago fue exitoso)
     useEffect(() => {
@@ -66,6 +133,11 @@ export default function CheckoutPage() {
         // Validaciones
         if (!nombre || !apellido || !email || !telefono || !calle || !region || !comuna) {
             setError('Por favor, completa todos los campos obligatorios');
+            return;
+        }
+
+        if (requiereFactura && (!razonSocial || !rut || !giro || !direccionFactura)) {
+            setError('Por favor, completa todos los campos de facturación');
             return;
         }
 
@@ -93,6 +165,7 @@ export default function CheckoutPage() {
                 const datosCompra = {
                     cliente: { nombre, apellido, email, telefono },
                     direccion: { calle, departamento, region, comuna, indicaciones },
+                    factura: requiereFactura ? { razonSocial, rut, giro, direccionFactura } : null,
                     productos: carrito,
                     subtotal: total,
                     envio: envio,
@@ -333,6 +406,114 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Datos de Facturación */}
+                            {requiereFactura && (
+                                <div className="bg-stone-900/90 backdrop-blur-md rounded-3xl p-8 border-2 border-teal-700 shadow-xl animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                                    <div className="flex items-center space-x-3 mb-6">
+                                        <div className="bg-gradient-to-br from-purple-600 to-purple-500 w-10 h-10 rounded-xl flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <h2 className="text-2xl font-black text-stone-100">Datos de Facturación</h2>
+                                    </div>
+
+                                    <div className="bg-teal-900/30 border-2 border-teal-700/50 text-teal-200 px-4 py-3 rounded-2xl mb-6 flex items-center space-x-3">
+                                        <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                                        <p className="text-sm">Ingresa el RUT y los datos se completarán automáticamente.</p>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-bold text-stone-300 mb-2">
+                                                    RUT *
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={rut}
+                                                        onChange={(e) => setRut(e.target.value)}
+                                                        disabled={procesando}
+                                                        className="w-full px-4 py-3 pr-12 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-4 focus:ring-purple-900 focus:border-purple-600 transition-all disabled:opacity-50"
+                                                        placeholder="12.345.678-9"
+                                                    />
+                                                    {consultandoRut && (
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-50">
+                                                            <svg className="animate-spin w-6 h-6" viewBox="0 0 24 24" fill="none">
+                                                                <circle 
+                                                                    className="opacity-25" 
+                                                                    cx="12" 
+                                                                    cy="12" 
+                                                                    r="10" 
+                                                                    stroke="currentColor" 
+                                                                    strokeWidth="4"
+                                                                    style={{ color: '#d1d5db' }}
+                                                                />
+                                                                <path 
+                                                                    className="opacity-75" 
+                                                                    fill="currentColor" 
+                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                                    style={{ color: '#fb923c' }}
+                                                                />
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {rutError && (
+                                                    <p className="text-orange-400 text-xs mt-2 flex items-center space-x-1">
+                                                        <AlertCircle className="w-3 h-3" />
+                                                        <span>{rutError}</span>
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-bold text-stone-300 mb-2">
+                                                    Giro *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={giro}
+                                                    onChange={(e) => setGiro(e.target.value)}
+                                                    disabled={procesando}
+                                                    className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-4 focus:ring-purple-900 focus:border-purple-600 transition-all disabled:opacity-50"
+                                                    placeholder="Ej: Comercio al por menor"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold text-stone-300 mb-2">
+                                                Razón Social *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={razonSocial}
+                                                onChange={(e) => setRazonSocial(e.target.value)}
+                                                disabled={procesando || consultandoRut}
+                                                className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-4 focus:ring-purple-900 focus:border-purple-600 transition-all disabled:opacity-50"
+                                                placeholder="Nombre de la empresa"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold text-stone-300 mb-2">
+                                                Dirección de Facturación *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={direccionFactura}
+                                                onChange={(e) => setDireccionFactura(e.target.value)}
+                                                disabled={procesando || consultandoRut}
+                                                className="w-full px-4 py-3 bg-stone-800 border-2 border-stone-700 rounded-2xl text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-4 focus:ring-purple-900 focus:border-purple-600 transition-all disabled:opacity-50"
+                                                placeholder="Dirección registrada en el SII"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Botón de pago */}
                             <button
