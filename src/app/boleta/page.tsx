@@ -21,6 +21,12 @@ interface DatosCompra {
         comuna: string;
         indicaciones: string;
     };
+    factura?: {
+        razonSocial: string;
+        rut: string;
+        giro: string;
+        direccionFactura: string;
+    } | null;
     productos: Array<{
         nombre: string;
         precio: number;
@@ -258,6 +264,127 @@ export default function BoletaPage() {
                         </p>
                     </div>
                 </div>
+
+                {/* Factura - Solo si existe */}
+                {datosCompra.factura && (
+                    <div className="bg-stone-900/90 backdrop-blur-md rounded-3xl border-2 border-purple-800 shadow-2xl overflow-hidden animate-slide-up mt-8">
+                        {/* Header de la factura */}
+                        <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 p-8 text-white">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 className="text-3xl font-black">FACTURA ELECTRÓNICA</h2>
+                                    <p className="text-white/90 text-sm">EX DIGITAL</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-white/90 text-sm">Factura N°</p>
+                                    <p className="text-2xl font-bold">{datosCompra.numeroOrden}-F</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2 text-white/90">
+                                <Calendar className="w-4 h-4" />
+                                <span className="text-sm">{fechaFormateada}</span>
+                            </div>
+                        </div>
+
+                        {/* Contenido de la factura */}
+                        <div className="p-8 space-y-8">
+                            {/* Datos de facturación */}
+                            <div>
+                                <h3 className="text-xl font-bold text-stone-100 mb-4 flex items-center space-x-2">
+                                    <div className="bg-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
+                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <span>Datos de Facturación</span>
+                                </h3>
+                                <div className="bg-stone-800/50 rounded-2xl p-6 space-y-3">
+                                    <p className="text-stone-300">
+                                        <strong className="text-stone-100">Razón Social:</strong> {datosCompra.factura.razonSocial}
+                                    </p>
+                                    <p className="text-stone-300">
+                                        <strong className="text-stone-100">RUT:</strong> {datosCompra.factura.rut}
+                                    </p>
+                                    <p className="text-stone-300">
+                                        <strong className="text-stone-100">Giro:</strong> {datosCompra.factura.giro}
+                                    </p>
+                                    <p className="text-stone-300">
+                                        <strong className="text-stone-100">Dirección:</strong> {datosCompra.factura.direccionFactura}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Productos en la factura */}
+                            <div>
+                                <h3 className="text-xl font-bold text-stone-100 mb-4 flex items-center space-x-2">
+                                    <div className="bg-cyan-600 w-8 h-8 rounded-lg flex items-center justify-center">
+                                        <CreditCard className="w-4 h-4 text-white" />
+                                    </div>
+                                    <span>Detalle de Productos</span>
+                                </h3>
+                                <div className="bg-stone-800/50 rounded-2xl p-6">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b-2 border-stone-700">
+                                                <th className="text-left text-stone-300 py-3 font-bold">Producto</th>
+                                                <th className="text-center text-stone-300 py-3 font-bold">Cant.</th>
+                                                <th className="text-right text-stone-300 py-3 font-bold">Precio Unit.</th>
+                                                <th className="text-right text-stone-300 py-3 font-bold">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {datosCompra.productos.map((producto, index) => (
+                                                <tr key={index} className="border-b border-stone-700 last:border-0">
+                                                    <td className="py-3 text-stone-100">{producto.nombre}</td>
+                                                    <td className="py-3 text-center text-stone-300">{producto.cantidad}</td>
+                                                    <td className="py-3 text-right text-stone-300">${producto.precio.toLocaleString('es-CL')}</td>
+                                                    <td className="py-3 text-right text-stone-100 font-bold">${(producto.precio * producto.cantidad).toLocaleString('es-CL')}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Totales con IVA */}
+                            <div className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-6 border-2 border-purple-700">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-stone-300">
+                                        <span>Subtotal Neto</span>
+                                        <span className="font-semibold">${Math.round(datosCompra.subtotal / 1.19).toLocaleString('es-CL')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-stone-300">
+                                        <span>IVA (19%)</span>
+                                        <span className="font-semibold">${Math.round(datosCompra.subtotal - (datosCompra.subtotal / 1.19)).toLocaleString('es-CL')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-stone-300">
+                                        <span>Envío</span>
+                                        {datosCompra.envio === 0 ? (
+                                            <span className="font-semibold text-teal-400">Gratis</span>
+                                        ) : (
+                                            <span className="font-semibold">${datosCompra.envio.toLocaleString('es-CL')}</span>
+                                        )}
+                                    </div>
+                                    <div className="border-t-2 border-purple-700 pt-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-stone-100 font-bold text-xl">Total a Pagar</span>
+                                            <span className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                                ${datosCompra.total.toLocaleString('es-CL')}
+                                            </span>
+                                        </div>
+                                        <p className="text-stone-500 text-xs text-right mt-1">CLP (IVA Incluido)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Información de factura electrónica */}
+                            <div className="bg-purple-900/20 border-2 border-purple-700/50 text-purple-200 px-6 py-4 rounded-2xl">
+                                <p className="font-bold text-purple-100 mb-2">Factura Electrónica:</p>
+                                <p className="text-sm">Esta factura electrónica será enviada al SII automáticamente. Recibirás una copia en formato PDF al correo registrado en las próximas 24 horas.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
