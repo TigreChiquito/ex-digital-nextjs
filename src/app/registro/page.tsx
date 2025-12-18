@@ -73,15 +73,31 @@ export default function RegistroPage() {
         // Mostrar notificación de éxito
         const notification = document.createElement('div');
         notification.className = 'fixed top-24 right-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 border border-teal-500';
-        notification.innerHTML = `
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      <div>
-        <p class="font-bold">¡Registro exitoso!</p>
-        <p class="text-sm opacity-90">Bienvenido a Ex-Digital</p>
-      </div>
-    `;
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'w-6 h-6');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('d', 'M5 13l4 4L19 7');
+        svg.appendChild(path);
+        
+        const div = document.createElement('div');
+        const title = document.createElement('p');
+        title.className = 'font-bold';
+        title.textContent = '¡Registro exitoso!';
+        const message = document.createElement('p');
+        message.className = 'text-sm opacity-90';
+        message.textContent = 'Bienvenido a Ex-Digital';
+        div.appendChild(title);
+        div.appendChild(message);
+        
+        notification.appendChild(svg);
+        notification.appendChild(div);
         document.body.appendChild(notification);
 
         setTimeout(() => {
